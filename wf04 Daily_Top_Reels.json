@@ -1,0 +1,1404 @@
+{
+  "name": "wf04 Daily_Top_Reels",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## SETUP AFTER IMPORT (3 clicks)\n1. **Get snapshots** & **Upsert snapshot**: open each, pick your `reels_snapshots` Data table from the dropdown (the table ID is instance-specific, can't be pre-filled).\n2. **Upsert snapshot**: set Matching column = `reel_id`, and map reel_id={{$json.snap_id}}, prev_views={{$json.snap_views}}, prev_likes={{$json.snap_likes}}, prev_seen_ts={{$json.snap_seen_ts}}.\n3. **Get scraped reels**: replace with your real source (Postgres/Sheets/HTTP).\n\nMerge enriches each scraper item with prev_* from the snapshot (matched on id = reel_id).",
+        "height": 320,
+        "width": 420,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        432,
+        -32
+      ],
+      "id": "2d2e2589-9cab-4016-8bdd-e8daf8fef3b0",
+      "name": "READ ME"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 2,
+              "triggerAtMinute": 20
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        912,
+        128
+      ],
+      "id": "0b96810c-2042-4de5-b8c2-34d0b9211c1b",
+      "name": "Daily 09:00"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "tMUK5sSD55DQZRo6",
+          "mode": "list",
+          "cachedResultName": "IG Reels scraper general",
+          "cachedResultUrl": "/projects/Z4xKAmlikaZIHgF6/datatables/tMUK5sSD55DQZRo6"
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        1184,
+        272
+      ],
+      "id": "be963e38-ecde-4102-a402-976243078797",
+      "name": "Get snapshots",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "shortcode",
+        "joinMode": "enrichInput1",
+        "options": {
+          "clashHandling": {
+            "values": {
+              "resolveClash": "preferInput1"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1472,
+        128
+      ],
+      "id": "a61a2904-a337-4120-88e0-770e5efcb125",
+      "name": "Attach prev snapshot"
+    },
+    {
+      "parameters": {
+        "jsCode": "/**\n * Daily Top Reels selector — n8n Code node (\"Run Once for All Items\").\n *\n * INPUT (one item per scraped row). Each item.json must contain the scraper\n * fields PLUS the previous snapshot attached by an upstream \"Data Table > Get\"\n * node (null/undefined if the reel was never seen before):\n *   product_type, like_count, comment_count, play_count, ig_play_count,\n *   reshare_count, taken_at_timestamp, id, shortcode, url, gd_file_id, ...\n *   prev_views, prev_likes, prev_seen_ts   <-- from Data Table lookup (by shortcode)\n *\n * OUTPUT: every reel that passes the quality gates, scored + ranked + momentum\n * flags. The top N NOT-yet-used reels carry is_pick=true. Downstream\n * \"Data Table > Upsert\" writes back the new snapshot, keyed on shortcode.\n */\n\n// ---------------------------------------------------------------- CONFIG\nconst CFG = {\n  MIN_VIEWS:      5000,    // hard floor: drop sub-noise reels\n  MIN_LIKE_RATE:  0.01,    // hard floor: kills inflated/dead views (3 likes / 160k)\n  HALF_LIFE_DAYS: 14,      // recency decay: 14d old => recency ~0.5\n  W_VIEWS:        0.30,    // weight: reach (percentile)\n  W_LIKE:         0.30,    // weight: like quality (percentile)\n  W_ENG:          0.20,    // weight: total engagement (percentile)\n  W_RECENCY:      0.20,    // weight: freshness (exp decay, 0..1)\n  MOMENTUM_PCT:   0.20,    // +20% views since last snapshot => momentum\n  MOMENTUM_BONUS: 0.10,    // score nudge so re-accelerating reels resurface\n  TOP_N:          5,       // how many to mark as picks\n  ADDED_FIELD:    'status',        // sheet column holding the used/queued status\n  ADDED_VALUE:    'moved_to_top',  // value that means \"already added\" -> skip from picks\n};\n\nconst num = (v) => {\n  const n = Number(v);\n  return Number.isFinite(n) ? n : 0;\n};\n\n// Accept either a unix-epoch (number or numeric string) or an ISO datetime\n// string and return milliseconds since epoch. Returns NaN if unparseable.\nconst toMs = (v) => {\n  if (v == null || v === '') return NaN;\n  if (typeof v === 'number') return v * 1000;          // epoch seconds\n  if (/^\\d+$/.test(String(v).trim())) return Number(v) * 1000; // \"1781119335\"\n  const t = Date.parse(v);                              // \"2026-06-10T19:22:15+00:00\"\n  return Number.isFinite(t) ? t : NaN;\n};\n\n// percentile rank (0..1) of each value within an array (ties -> average rank)\nfunction percentiles(values) {\n  const sorted = [...values].sort((a, b) => a - b);\n  return values.map((v) => {\n    let lo = 0, hi = 0;\n    for (const s of sorted) { if (s < v) lo++; if (s <= v) hi++; }\n    return (lo + hi) / 2 / sorted.length; // midrank / n\n  });\n}\n\nconst nowMs = Date.now();\nconst rows = $input.all().map((i) => i.json);\n\n// ----------------------------------------------------- GATES + FEATURES\nconst gated = [];\nfor (const r of rows) {\n  if (r.product_type !== 'clips') continue;             // reels only\n\n  const views  = Math.max(num(r.play_count), num(r.ig_play_count));\n  const likes  = num(r.like_count);\n  const comments = num(r.comment_count);\n  const shares = num(r.reshare_count);\n  const likeRate = views > 0 ? likes / views : 0;\n\n  if (views < CFG.MIN_VIEWS) continue;                  // floor: reach\n  if (likeRate < CFG.MIN_LIKE_RATE) continue;           // floor: kills fake views\n\n  const engRate = views > 0 ? (likes + comments + shares) / views : 0;\n  let tsMs = toMs(r.taken_at);                          // epoch field first\n  if (!Number.isFinite(tsMs)) tsMs = toMs(r.taken_at_timestamp); // ISO fallback\n  const ageDays = Number.isFinite(tsMs) ? (nowMs - tsMs) / 86400000 : 9999;\n  const recency = Math.exp(-ageDays / CFG.HALF_LIFE_DAYS);\n\n  // ---- momentum vs previous snapshot ----\n  const prevViews = r.prev_views != null ? num(r.prev_views) : null;\n  const prevLikes = r.prev_likes != null ? num(r.prev_likes) : null;\n  const isNew = prevViews == null;\n  const dViews = isNew ? 0 : views - prevViews;\n  const dLikes = isNew ? 0 : likes - prevLikes;\n  const prevSeenMs = r.prev_seen_ts ? new Date(r.prev_seen_ts).getTime() : null;\n  const daysSince = prevSeenMs ? Math.max((nowMs - prevSeenMs) / 86400000, 1) : null;\n  const velocity = daysSince ? dViews / daysSince : 0; // views/day since last run\n  const grewPct = prevViews && prevViews > 0 ? dViews / prevViews : 0;\n  const momentum = !isNew && grewPct >= CFG.MOMENTUM_PCT;\n\n  gated.push({\n    ...r,\n    views, likes, comments, shares,\n    like_rate: likeRate, eng_rate: engRate,\n    age_days: ageDays, recency,\n    is_new: isNew, d_views: dViews, d_likes: dLikes,\n    velocity, grew_pct: grewPct, momentum,\n  });\n}\n\n// ------------------------------------------------- PERCENTILES + SCORE\nconst pV = percentiles(gated.map((g) => g.views));\nconst pL = percentiles(gated.map((g) => g.like_rate));\nconst pE = percentiles(gated.map((g) => g.eng_rate));\n\ngated.forEach((g, idx) => {\n  g.p_views = pV[idx];\n  g.p_like  = pL[idx];\n  g.p_eng   = pE[idx];\n  g.score =\n    CFG.W_VIEWS   * g.p_views +\n    CFG.W_LIKE    * g.p_like +\n    CFG.W_ENG     * g.p_eng +\n    CFG.W_RECENCY * g.recency +\n    (g.momentum ? CFG.MOMENTUM_BONUS : 0);\n});\n\n// --------------------------------------------------- RANK + MARK PICKS\ngated.sort((a, b) => b.score - a.score);\nlet picked = 0;\ngated.forEach((g, i) => {\n  g.rank = i + 1;\n  // exclude already-used reels from picks, but keep them in the pool so\n  // percentiles stay stable and their snapshot keeps updating.\n  const alreadyAdded =\n    String(g[CFG.ADDED_FIELD] || '').trim() === CFG.ADDED_VALUE;\n  g.is_pick = !alreadyAdded && picked < CFG.TOP_N;\n  if (g.is_pick) picked++;\n  g.flag = g.is_new ? 'new' : (g.momentum ? 'momentum' : 'tracked');\n  // snapshot fields for the downstream Data Table > Upsert (key = shortcode)\n  g.snap_shortcode = g.shortcode;\n  g.snap_views = g.views;\n  g.snap_likes = g.likes;\n  g.snap_seen_ts = new Date(nowMs).toISOString().slice(0, 10);\n});\n\nreturn gated.map((json) => ({ json }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1712,
+        128
+      ],
+      "id": "f3240575-201e-4dc2-b77a-0d02f176ccdc",
+      "name": "Score & rank reels"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.is_pick }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "id": "26541482-d3c9-4c53-9803-62e2ba6e5f33"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        2000,
+        16
+      ],
+      "id": "977e9559-f2e8-4dfb-bfd3-99c5026f1346",
+      "name": "Keep picks (is_pick)"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "tMUK5sSD55DQZRo6",
+          "mode": "list",
+          "cachedResultName": "IG Reels scraper general",
+          "cachedResultUrl": "/projects/Z4xKAmlikaZIHgF6/datatables/tMUK5sSD55DQZRo6"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "shortcode",
+              "keyValue": "={{ $json.shortcode }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "caption_is_edited": "={{ $json.caption_is_edited }}",
+            "like_and_view_counts_disabled": "={{ $json.like_and_view_counts_disabled }}",
+            "share_count_disabled": "={{ $json.share_count_disabled }}",
+            "has_audio": "={{ $json.has_audio }}",
+            "is_paid_partnership": "={{ $json.is_paid_partnership }}",
+            "can_viewer_reshare": "={{ $json.can_viewer_reshare }}",
+            "ig_media_sharing_disabled": "={{ $json.ig_media_sharing_disabled }}",
+            "has_tagged_users": "={{ $json.has_tagged_users }}",
+            "post_id": "={{ $json.post_id }}",
+            "taken_at": "={{ $json.taken_at }}",
+            "media_type": "={{ $json.media_type }}",
+            "carousel_media_count": "={{ $json.carousel_media_count }}",
+            "like_count": "={{ $json.like_count }}",
+            "comment_count": "={{ $json.comment_count }}",
+            "play_count": "={{ $json.play_count }}",
+            "ig_play_count": "={{ $json.ig_play_count }}",
+            "fb_play_count": "={{ $json.fb_play_count }}",
+            "fb_like_count": "={{ $json.fb_like_count }}",
+            "fb_comment_count": "={{ $json.fb_comment_count }}",
+            "reshare_count": "={{ $json.reshare_count }}",
+            "duration_seconds": "={{ $json.duration_seconds }}",
+            "original_width": "={{ $json.original_width }}",
+            "original_height": "={{ $json.original_height }}",
+            "shortcode": "={{ $json.shortcode }}",
+            "url": "={{ $json.url }}",
+            "taken_at_timestamp": "={{ $json.taken_at_timestamp }}",
+            "scraped_at": "={{ $json.scraped_at }}",
+            "product_type": "={{ $json.product_type }}",
+            "author": "={{ $json.author }}",
+            "caption": "={{ $json.caption }}",
+            "hashtags": "={{ $json.hashtags }}",
+            "mentions": "={{ $json.mentions }}",
+            "video_url": "={{ $json.video_url }}",
+            "thumbnail_url": "={{ $json.thumbnail_url }}",
+            "audio": "={{ $json.audio }}",
+            "location": "={{ $json.location }}",
+            "coauthor_usernames": "={{ $json.coauthor_usernames }}",
+            "status": "={{ $json.status }}",
+            "gd_file_id": "={{ $json.gd_file_id }}",
+            "link_to_gdrive": "={{ $json.link_to_gdrive }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "post_id",
+              "displayName": "post_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "shortcode",
+              "displayName": "shortcode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "taken_at",
+              "displayName": "taken_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "taken_at_timestamp",
+              "displayName": "taken_at_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "scraped_at",
+              "displayName": "scraped_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "product_type",
+              "displayName": "product_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "media_type",
+              "displayName": "media_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "author",
+              "displayName": "author",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "caption",
+              "displayName": "caption",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "hashtags",
+              "displayName": "hashtags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "mentions",
+              "displayName": "mentions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "caption_is_edited",
+              "displayName": "caption_is_edited",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "carousel_media_count",
+              "displayName": "carousel_media_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "like_count",
+              "displayName": "like_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "comment_count",
+              "displayName": "comment_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "play_count",
+              "displayName": "play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ig_play_count",
+              "displayName": "ig_play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fb_play_count",
+              "displayName": "fb_play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fb_like_count",
+              "displayName": "fb_like_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "fb_comment_count",
+              "displayName": "fb_comment_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "reshare_count",
+              "displayName": "reshare_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "like_and_view_counts_disabled",
+              "displayName": "like_and_view_counts_disabled",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "share_count_disabled",
+              "displayName": "share_count_disabled",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "video_url",
+              "displayName": "video_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "thumbnail_url",
+              "displayName": "thumbnail_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "duration_seconds",
+              "displayName": "duration_seconds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "original_width",
+              "displayName": "original_width",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "original_height",
+              "displayName": "original_height",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "has_audio",
+              "displayName": "has_audio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "audio",
+              "displayName": "audio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "is_paid_partnership",
+              "displayName": "is_paid_partnership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "can_viewer_reshare",
+              "displayName": "can_viewer_reshare",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ig_media_sharing_disabled",
+              "displayName": "ig_media_sharing_disabled",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "coauthor_usernames",
+              "displayName": "coauthor_usernames",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "has_tagged_users",
+              "displayName": "has_tagged_users",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "gd_file_id",
+              "displayName": "gd_file_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "link_to_gdrive",
+              "displayName": "link_to_gdrive",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        2016,
+        272
+      ],
+      "id": "62e4708c-7853-4396-b77e-9451980e2c0c",
+      "name": "Upsert snapshot"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ah3Lz5Opg7GaHMxjZ0h3a-vaZBJ5XEeBX66iONJ46ks",
+          "mode": "list",
+          "cachedResultName": "IG Reels scraper",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1114552552,
+          "mode": "list",
+          "cachedResultName": "general",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit#gid=1114552552"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1184,
+        80
+      ],
+      "id": "75fc19f8-2060-4ae7-b4ad-77986e58a9e9",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "KfwbD2ROouMFmFE6",
+          "name": "Kirill Speechify"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1ah3Lz5Opg7GaHMxjZ0h3a-vaZBJ5XEeBX66iONJ46ks",
+          "mode": "list",
+          "cachedResultName": "IG Reels scraper",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1839004881,
+          "mode": "list",
+          "cachedResultName": "for_generating",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit#gid=1839004881"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "shortcode": "={{ $json.shortcode }}",
+            "url": "={{ $json.url }}",
+            "scraped_at": "={{ $json.scraped_at }}",
+            "taken_at_timestamp": "={{ $json.taken_at_timestamp }}",
+            "caption": "={{ $json.caption }}",
+            "like_count": "={{ $json.like_count }}",
+            "comment_count": "={{ $json.comment_count }}",
+            "play_count": "={{ $json.play_count }}",
+            "ig_play_count": "={{ $json.ig_play_count }}",
+            "duration_seconds": "={{ $json.duration_seconds }}",
+            "gd_file_id": "={{ $json.gd_file_id }}",
+            "link_to_gdrive": "={{ $json.link_to_gdrive }}",
+            "status": "queued"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "shortcode",
+              "displayName": "shortcode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "taken_at_timestamp",
+              "displayName": "taken_at_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "scraped_at",
+              "displayName": "scraped_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "caption",
+              "displayName": "caption",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "like_count",
+              "displayName": "like_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "comment_count",
+              "displayName": "comment_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "play_count",
+              "displayName": "play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ig_play_count",
+              "displayName": "ig_play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "duration_seconds",
+              "displayName": "duration_seconds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "gd_file_id",
+              "displayName": "gd_file_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "link_to_gdrive",
+              "displayName": "link_to_gdrive",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2208,
+        16
+      ],
+      "id": "b4957d70-e720-4283-98a5-4e5d66045be5",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "KfwbD2ROouMFmFE6",
+          "name": "Kirill Speechify"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1ah3Lz5Opg7GaHMxjZ0h3a-vaZBJ5XEeBX66iONJ46ks",
+          "mode": "list",
+          "cachedResultName": "IG Reels scraper",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1114552552,
+          "mode": "list",
+          "cachedResultName": "general",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit#gid=1114552552"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "shortcode": "={{ $json.shortcode }}",
+            "status": "moved_to_top"
+          },
+          "matchingColumns": [
+            "shortcode"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "shortcode",
+              "displayName": "shortcode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "taken_at",
+              "displayName": "taken_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "taken_at_timestamp",
+              "displayName": "taken_at_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "scraped_at",
+              "displayName": "scraped_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "product_type",
+              "displayName": "product_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "media_type",
+              "displayName": "media_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "author",
+              "displayName": "author",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "caption",
+              "displayName": "caption",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "hashtags",
+              "displayName": "hashtags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "mentions",
+              "displayName": "mentions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "caption_is_edited",
+              "displayName": "caption_is_edited",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "carousel_media_count",
+              "displayName": "carousel_media_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "like_count",
+              "displayName": "like_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "comment_count",
+              "displayName": "comment_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "play_count",
+              "displayName": "play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ig_play_count",
+              "displayName": "ig_play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "fb_play_count",
+              "displayName": "fb_play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "fb_like_count",
+              "displayName": "fb_like_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "fb_comment_count",
+              "displayName": "fb_comment_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reshare_count",
+              "displayName": "reshare_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "like_and_view_counts_disabled",
+              "displayName": "like_and_view_counts_disabled",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "share_count_disabled",
+              "displayName": "share_count_disabled",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "video_url",
+              "displayName": "video_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "thumbnail_url",
+              "displayName": "thumbnail_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "duration_seconds",
+              "displayName": "duration_seconds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "original_width",
+              "displayName": "original_width",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "original_height",
+              "displayName": "original_height",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "has_audio",
+              "displayName": "has_audio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "audio",
+              "displayName": "audio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "is_paid_partnership",
+              "displayName": "is_paid_partnership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "can_viewer_reshare",
+              "displayName": "can_viewer_reshare",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ig_media_sharing_disabled",
+              "displayName": "ig_media_sharing_disabled",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "coauthor_usernames",
+              "displayName": "coauthor_usernames",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "has_tagged_users",
+              "displayName": "has_tagged_users",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "_metadata",
+              "displayName": "_metadata",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "gd_file_id",
+              "displayName": "gd_file_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "link_to_gdrive",
+              "displayName": "link_to_gdrive",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2416,
+        16
+      ],
+      "id": "4fc0d3ac-f9a3-4b7d-a87a-02c403bf0bc1",
+      "name": "Update status",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "KfwbD2ROouMFmFE6",
+          "name": "Kirill Speechify"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Daily 09:00": {
+      "main": [
+        [
+          {
+            "node": "Get snapshots",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get snapshots": {
+      "main": [
+        [
+          {
+            "node": "Attach prev snapshot",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Attach prev snapshot": {
+      "main": [
+        [
+          {
+            "node": "Score & rank reels",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score & rank reels": {
+      "main": [
+        [
+          {
+            "node": "Keep picks (is_pick)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Upsert snapshot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Keep picks (is_pick)": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Attach prev snapshot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Update status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "3defc399-221a-43df-94c9-b2803d0f7480",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b4133111f3c5848c25758b32cbf6eac5c8844e43bb04ededb8c87ee88bcf165a"
+  },
+  "nodeGroups": [],
+  "id": "5aqH7BnA42Cgn8MU",
+  "tags": []
+}

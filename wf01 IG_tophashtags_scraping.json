@@ -1,0 +1,759 @@
+{
+  "name": "wf01 IG_tophashtags_scraping",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        368,
+        432
+      ],
+      "id": "3e19a5e8-2543-4845-b230-7caacb899f0d",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ah3Lz5Opg7GaHMxjZ0h3a-vaZBJ5XEeBX66iONJ46ks",
+          "mode": "list",
+          "cachedResultName": "Instagram Trend Discovery Pipeline",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "tags_for_scraping",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        704,
+        432
+      ],
+      "id": "de97d8d6-340b-41d5-9a5d-d14f79afbb1c",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "KfwbD2ROouMFmFE6",
+          "name": "Kirill Speechify"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "Run actor and get dataset",
+        "actorId": {
+          "__rl": true,
+          "value": "3d0WBo0KbTUrk4z9V",
+          "mode": "list",
+          "cachedResultName": "Instagram Hashtag Posts Scraper (breathtaking_anthem/instagram-hashtag-posts-scraper)",
+          "cachedResultUrl": "https://console.apify.com/actors/3d0WBo0KbTUrk4z9V/input"
+        },
+        "customBody": "={\n    \"hashtag\": \"{{ $json.tags }}\",\n    \"max_items\": 50,\n    \"scrape_type\": \"top\"\n}"
+      },
+      "type": "@apify/n8n-nodes-apify.apify",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        448
+      ],
+      "id": "6ef3584d-6709-479c-8299-8df9f02b0da4",
+      "name": "Run an Actor and get dataset",
+      "credentials": {
+        "apifyApi": {
+          "id": "EI4FKRX4VPKCfMpO",
+          "name": "Apify account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1ah3Lz5Opg7GaHMxjZ0h3a-vaZBJ5XEeBX66iONJ46ks",
+          "mode": "list",
+          "cachedResultName": "Instagram Trend Discovery Pipeline",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1114552552,
+          "mode": "list",
+          "cachedResultName": "general",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit#gid=1114552552"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "shortcode": "={{ $json.shortcode }}",
+            "id": "={{ $json.id }}",
+            "url": "={{ $json.url }}",
+            "taken_at": "={{ $json.taken_at }}",
+            "taken_at_timestamp": "={{ $json.taken_at_timestamp }}",
+            "scraped_at": "={{ $json.scraped_at }}",
+            "product_type": "={{ $json.product_type }}",
+            "media_type": "={{ $json.media_type }}",
+            "author": "={{ $json.author }}",
+            "caption": "={{ $json.caption }}",
+            "hashtags": "={{ $json.hashtags }}",
+            "mentions": "={{ $json.mentions }}",
+            "caption_is_edited": "={{ $json.caption_is_edited }}",
+            "like_count": "={{ $json.like_count }}",
+            "carousel_media_count": "={{ $json.carousel_media_count }}",
+            "comment_count": "={{ $json.comment_count }}",
+            "play_count": "={{ $json.play_count }}",
+            "ig_play_count": "={{ $json.ig_play_count }}",
+            "fb_play_count": "={{ $json.fb_play_count }}",
+            "fb_like_count": "={{ $json.fb_like_count }}",
+            "fb_comment_count": "={{ $json.fb_comment_count }}",
+            "reshare_count": "={{ $json.reshare_count }}",
+            "like_and_view_counts_disabled": "={{ $json.like_and_view_counts_disabled }}",
+            "share_count_disabled": "={{ $json.share_count_disabled }}",
+            "video_url": "={{ $json.video_url }}",
+            "thumbnail_url": "={{ $json.thumbnail_url }}",
+            "duration_seconds": "={{ $json.duration_seconds }}",
+            "original_width": "={{ $json.original_width }}",
+            "has_audio": "={{ $json.has_audio }}",
+            "original_height": "={{ $json.original_height }}",
+            "audio": "={{ $json.audio }}",
+            "is_paid_partnership": "={{ $json.is_paid_partnership }}",
+            "can_viewer_reshare": "={{ $json.can_viewer_reshare }}",
+            "ig_media_sharing_disabled": "={{ $json.ig_media_sharing_disabled }}",
+            "location": "={{ $json.location }}",
+            "coauthor_usernames": "={{ $json.coauthor_usernames }}",
+            "has_tagged_users": "={{ $json.has_tagged_users }}",
+            "_metadata": "={{ $json._metadata }}",
+            "status": "={{ $json.status }}"
+          },
+          "matchingColumns": [
+            "shortcode"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "shortcode",
+              "displayName": "shortcode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "taken_at",
+              "displayName": "taken_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "taken_at_timestamp",
+              "displayName": "taken_at_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "scraped_at",
+              "displayName": "scraped_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "product_type",
+              "displayName": "product_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "media_type",
+              "displayName": "media_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "author",
+              "displayName": "author",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "caption",
+              "displayName": "caption",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "hashtags",
+              "displayName": "hashtags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "mentions",
+              "displayName": "mentions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "caption_is_edited",
+              "displayName": "caption_is_edited",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "carousel_media_count",
+              "displayName": "carousel_media_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "like_count",
+              "displayName": "like_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "comment_count",
+              "displayName": "comment_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "play_count",
+              "displayName": "play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ig_play_count",
+              "displayName": "ig_play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fb_play_count",
+              "displayName": "fb_play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fb_like_count",
+              "displayName": "fb_like_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fb_comment_count",
+              "displayName": "fb_comment_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "reshare_count",
+              "displayName": "reshare_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "like_and_view_counts_disabled",
+              "displayName": "like_and_view_counts_disabled",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "share_count_disabled",
+              "displayName": "share_count_disabled",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "video_url",
+              "displayName": "video_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "thumbnail_url",
+              "displayName": "thumbnail_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "duration_seconds",
+              "displayName": "duration_seconds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "original_width",
+              "displayName": "original_width",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "original_height",
+              "displayName": "original_height",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "has_audio",
+              "displayName": "has_audio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "audio",
+              "displayName": "audio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "is_paid_partnership",
+              "displayName": "is_paid_partnership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "can_viewer_reshare",
+              "displayName": "can_viewer_reshare",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ig_media_sharing_disabled",
+              "displayName": "ig_media_sharing_disabled",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "coauthor_usernames",
+              "displayName": "coauthor_usernames",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "has_tagged_users",
+              "displayName": "has_tagged_users",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "_metadata",
+              "displayName": "_metadata",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "gd_file_id",
+              "displayName": "gd_file_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "link_to_gdrive",
+              "displayName": "link_to_gdrive",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1472,
+        448
+      ],
+      "id": "2a63c847-092f-4b65-a081-8947cc8c1f1d",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "KfwbD2ROouMFmFE6",
+          "name": "Kirill Speechify"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        896,
+        432
+      ],
+      "id": "d9c7fec3-059d-4fe0-b8c6-1a06b3cfd2ce",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "VV5hXrQQDjHvs8Yi",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/VV5hXrQQDjHvs8Yi",
+          "cachedResultName": "IG video sccrapper Download"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1104,
+        256
+      ],
+      "id": "529ec506-418c-4978-9856-d399cb60f323",
+      "name": "Call 'IG video sccrapper Download'"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ah3Lz5Opg7GaHMxjZ0h3a-vaZBJ5XEeBX66iONJ46ks",
+          "mode": "list",
+          "cachedResultName": "Instagram Trend Discovery Pipeline",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1114552552,
+          "mode": "list",
+          "cachedResultName": "general",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit#gid=1114552552"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        528,
+        432
+      ],
+      "id": "086f9660-1438-4bcd-8de3-a7ab2a46ff95",
+      "name": "Get existing rows",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "KfwbD2ROouMFmFE6",
+          "name": "Kirill Speechify"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// snapshot of current statuses from the `general` sheet\nconst prev = {};\nfor (const row of $('Get existing rows').all()) {\n  if (row.json.shortcode) prev[row.json.shortcode] = row.json.status;\n}\n\n// new reels -> 'scraped'; existing -> keep their current status\nreturn $input.all().map(item => {\n  const sc = item.json.shortcode;\n  item.json.status = (sc in prev && prev[sc]) ? prev[sc] : 'scraped';\n  return item;\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1280,
+        448
+      ],
+      "id": "7774d857-32a4-48a0-8703-87869818f62f",
+      "name": "Set status"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get existing rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run an Actor and get dataset": {
+      "main": [
+        [
+          {
+            "node": "Set status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Call 'IG video sccrapper Download'",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Run an Actor and get dataset",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set status": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get existing rows": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "5af73915-6733-4284-9e2f-beaa5fa9805c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b4133111f3c5848c25758b32cbf6eac5c8844e43bb04ededb8c87ee88bcf165a"
+  },
+  "nodeGroups": [],
+  "id": "XXwaF6m8ivySSOKN",
+  "tags": []
+}

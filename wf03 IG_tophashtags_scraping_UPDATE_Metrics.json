@@ -1,0 +1,988 @@
+{
+  "name": "Wf03 IG_tophashtags_scraping_UPDATE_Metrics",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1ah3Lz5Opg7GaHMxjZ0h3a-vaZBJ5XEeBX66iONJ46ks",
+          "mode": "list",
+          "cachedResultName": "Instagram Trend Discovery Pipeline",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1114552552,
+          "mode": "list",
+          "cachedResultName": "general",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit#gid=1114552552"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "shortcode": "={{ $json.shortCode }}",
+            "like_count": "={{ $json.likesCount }}",
+            "comment_count": "={{ $json.commentsCount }}",
+            "play_count": "={{ $json.videoPlayCount }}",
+            "row_number": 0
+          },
+          "matchingColumns": [
+            "shortcode"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "shortcode",
+              "displayName": "shortcode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "taken_at",
+              "displayName": "taken_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "taken_at_timestamp",
+              "displayName": "taken_at_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "scraped_at",
+              "displayName": "scraped_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "product_type",
+              "displayName": "product_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "media_type",
+              "displayName": "media_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "author",
+              "displayName": "author",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "caption",
+              "displayName": "caption",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "hashtags",
+              "displayName": "hashtags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "mentions",
+              "displayName": "mentions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "caption_is_edited",
+              "displayName": "caption_is_edited",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "carousel_media_count",
+              "displayName": "carousel_media_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "like_count",
+              "displayName": "like_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "comment_count",
+              "displayName": "comment_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "play_count",
+              "displayName": "play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ig_play_count",
+              "displayName": "ig_play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "fb_play_count",
+              "displayName": "fb_play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "fb_like_count",
+              "displayName": "fb_like_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "fb_comment_count",
+              "displayName": "fb_comment_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reshare_count",
+              "displayName": "reshare_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "like_and_view_counts_disabled",
+              "displayName": "like_and_view_counts_disabled",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "share_count_disabled",
+              "displayName": "share_count_disabled",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "video_url",
+              "displayName": "video_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "thumbnail_url",
+              "displayName": "thumbnail_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "duration_seconds",
+              "displayName": "duration_seconds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "original_width",
+              "displayName": "original_width",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "original_height",
+              "displayName": "original_height",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "has_audio",
+              "displayName": "has_audio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "audio",
+              "displayName": "audio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "is_paid_partnership",
+              "displayName": "is_paid_partnership",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "can_viewer_reshare",
+              "displayName": "can_viewer_reshare",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ig_media_sharing_disabled",
+              "displayName": "ig_media_sharing_disabled",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "coauthor_usernames",
+              "displayName": "coauthor_usernames",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "has_tagged_users",
+              "displayName": "has_tagged_users",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "_metadata",
+              "displayName": "_metadata",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "gd_file_id",
+              "displayName": "gd_file_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "link_to_gdrive",
+              "displayName": "link_to_gdrive",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1648,
+        1248
+      ],
+      "id": "5a3aa30f-e78b-41a0-8d31-d5c95c288be0",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "KfwbD2ROouMFmFE6",
+          "name": "Kirill Speechify"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "batchSize": 50,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        752,
+        1232
+      ],
+      "id": "0e2a3bc0-10d9-460f-ad87-6206d3356772",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "Run actor and get dataset",
+        "actorSource": "store",
+        "actorId": {
+          "__rl": true,
+          "value": "nH2AHrwxeTRJoN5hX",
+          "mode": "list",
+          "cachedResultName": "Instagram Post Scraper (apify/instagram-post-scraper)",
+          "cachedResultUrl": "https://console.apify.com/actors/nH2AHrwxeTRJoN5hX/input"
+        },
+        "customBody": "={{\n  JSON.stringify({\n    dataDetailLevel: \"detailedData\",\n    resultsLimit: 50,\n    skipPinnedPosts: false,\n    username: $json.urls\n  })\n}}"
+      },
+      "type": "@apify/n8n-nodes-apify.apify",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        1248
+      ],
+      "id": "1a1f7def-581e-413c-90b3-6d4066e66a85",
+      "name": "Run an Actor and get dataset",
+      "credentials": {
+        "apifyApi": {
+          "id": "EI4FKRX4VPKCfMpO",
+          "name": "Apify account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ah3Lz5Opg7GaHMxjZ0h3a-vaZBJ5XEeBX66iONJ46ks",
+          "mode": "list",
+          "cachedResultName": "IG Reels scraper",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1114552552,
+          "mode": "list",
+          "cachedResultName": "general",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit#gid=1114552552"
+        },
+        "options": {
+          "dataLocationOnSheet": {
+            "values": {
+              "rangeDefinition": "specifyRangeA1",
+              "range": "C1:C1000"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        64,
+        1152
+      ],
+      "id": "007d5775-418a-4c20-b4f3-9f60b2ed03f4",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "KfwbD2ROouMFmFE6",
+          "name": "Kirill Speechify"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        1232
+      ],
+      "id": "5eb9c5c8-50ec-48b7-b019-9512fbe5364a",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "jsCode": "const seen = new Set();\nconst urls = [];\n\nfor (const item of items) {\n  const raw = item.json.url;\n  if (!raw) continue;\n\n  const url = String(raw).trim();\n  if (!url || seen.has(url)) continue;\n\n  seen.add(url);\n  urls.push(url);\n}\n\nreturn [\n  {\n    json: {\n      urls,\n    },\n  },\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        1248
+      ],
+      "id": "454c1b85-0109-4396-902f-70e09b145be1",
+      "name": "Code: Collect URLs"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "IfyC05aM0eYqTAE7",
+          "mode": "list",
+          "cachedResultName": "IG Metrics Tracking State",
+          "cachedResultUrl": "/projects/Z4xKAmlikaZIHgF6/datatables/IfyC05aM0eYqTAE7"
+        },
+        "returnAll": true
+      },
+      "id": "a0802733-d0cf-4e36-9f83-1ab5e7f0bb68",
+      "name": "Get tracking state",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        64,
+        1360
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "url",
+        "joinMode": "enrichInput1",
+        "options": {
+          "clashHandling": {
+            "values": {
+              "resolveClash": "preferInput1"
+            }
+          }
+        }
+      },
+      "id": "42e6d1b9-cba5-421c-b9ab-a894e69e2cdc",
+      "name": "Merge tracking state",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        304,
+        1232
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "/**\n * Keeps only rows that are due for an Apify refresh.\n * New rows with no Data Table state pass through immediately.\n */\nconst now = Date.now();\n\nfunction toMs(value) {\n  if (value == null || value === '') return NaN;\n  const t = Date.parse(value);\n  return Number.isFinite(t) ? t : NaN;\n}\n\nreturn items.filter(item => {\n  const row = item.json;\n  const nextCheckMs = toMs(row.next_check_at);\n  if (!Number.isFinite(nextCheckMs)) return true;\n  return nextCheckMs <= now;\n});"
+      },
+      "id": "9d9f980a-8d70-4034-9689-adf480c27ac2",
+      "name": "Code: Filter due posts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        1232
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "/**\n * Compares fresh Apify metrics with the previous Data Table state and decides\n * when each reel should be checked again.\n */\nconst now = new Date();\nconst DAY_MS = 24 * 60 * 60 * 1000;\n\nconst CFG = {\n  ACTIVE_INTERVAL_DAYS: 1,\n  COOLDOWN_INTERVAL_DAYS: 2,\n  PAUSED_INTERVAL_DAYS: 7,\n  NO_GROWTH_CHECKS_TO_PAUSE: 3,\n};\n\nfunction num(value) {\n  const n = Number(value);\n  return Number.isFinite(n) ? n : 0;\n}\n\nfunction addDays(date, days) {\n  return new Date(date.getTime() + days * DAY_MS).toISOString();\n}\n\nfunction normalizeUrl(value) {\n  if (!value) return '';\n  const raw = String(value).trim();\n  if (!raw) return '';\n\n  try {\n    const u = new URL(raw);\n    u.hash = '';\n    u.search = '';\n    u.pathname = u.pathname.replace(/\\/+$/, '');\n    return u.toString().replace(/\\/+$/, '').toLowerCase();\n  } catch {\n    return raw.replace(/\\/+$/, '').toLowerCase();\n  }\n}\n\nfunction shortcodeFromUrl(value) {\n  const raw = String(value || '');\n  const m = raw.match(/instagram\\.com\\/(?:reel|p|tv)\\/([^/?#]+)/i);\n  return m ? m[1] : '';\n}\n\nfunction getShortcode(row) {\n  return row.shortCode || row.shortcode || row.code || shortcodeFromUrl(row.url || row.inputUrl);\n}\n\nfunction getViews(row) {\n  return Math.max(\n    num(row.videoPlayCount),\n    num(row.videoViewCount),\n    num(row.play_count),\n    num(row.ig_play_count),\n    num(row.views)\n  );\n}\n\nfunction getLikes(row) {\n  return num(row.likesCount ?? row.like_count);\n}\n\nfunction getComments(row) {\n  return num(row.commentsCount ?? row.comment_count);\n}\n\nlet previousItems = [];\ntry {\n  previousItems = $items('Code: Filter due posts').map(item => item.json);\n} catch (error) {\n  previousItems = [];\n}\n\nconst prevByUrl = new Map();\nconst prevByShortcode = new Map();\nfor (const prev of previousItems) {\n  const normalized = normalizeUrl(prev.url);\n  if (normalized) prevByUrl.set(normalized, prev);\n\n  const shortcode = prev.shortcode || prev.shortCode || shortcodeFromUrl(prev.url);\n  if (shortcode) prevByShortcode.set(String(shortcode), prev);\n}\n\nreturn items.map(item => {\n  const row = item.json;\n  const shortcode = getShortcode(row);\n\n  const candidateUrls = [\n    row.inputUrl,\n    row.url,\n    shortcode ? 'https://www.instagram.com/reel/' + shortcode : '',\n    shortcode ? 'https://www.instagram.com/p/' + shortcode : '',\n  ];\n\n  let prev = null;\n  for (const candidate of candidateUrls) {\n    const normalized = normalizeUrl(candidate);\n    if (normalized && prevByUrl.has(normalized)) {\n      prev = prevByUrl.get(normalized);\n      break;\n    }\n  }\n  if (!prev && shortcode) prev = prevByShortcode.get(String(shortcode));\n  if (!prev) prev = {};\n\n  const views = getViews(row);\n  const likes = getLikes(row);\n  const comments = getComments(row);\n\n  const hadPreviousState =\n    prev.last_checked_at ||\n    prev.last_views != null ||\n    prev.last_likes != null ||\n    prev.last_comments != null;\n\n  const prevViews = num(prev.last_views);\n  const prevLikes = num(prev.last_likes);\n  const prevComments = num(prev.last_comments);\n\n  const deltaViews = hadPreviousState ? views - prevViews : 0;\n  const deltaLikes = hadPreviousState ? likes - prevLikes : 0;\n  const deltaComments = hadPreviousState ? comments - prevComments : 0;\n\n  const grew = !hadPreviousState || deltaViews > 0 || deltaLikes > 0 || deltaComments > 0;\n  const noGrowthChecks = grew ? 0 : num(prev.no_growth_checks) + 1;\n\n  let trackingStatus = 'active';\n  let nextCheckAt = addDays(now, CFG.ACTIVE_INTERVAL_DAYS);\n\n  if (!grew && noGrowthChecks >= CFG.NO_GROWTH_CHECKS_TO_PAUSE) {\n    trackingStatus = 'paused_no_growth';\n    nextCheckAt = addDays(now, CFG.PAUSED_INTERVAL_DAYS);\n  } else if (!grew) {\n    trackingStatus = 'cooldown';\n    nextCheckAt = addDays(now, CFG.COOLDOWN_INTERVAL_DAYS);\n  }\n\n  const trackingUrl = prev.url || row.inputUrl || row.url || (shortcode ? 'https://www.instagram.com/reel/' + shortcode + '/' : '');\n\n  return {\n    json: {\n      ...row,\n      tracking_url: trackingUrl,\n      tracking_shortcode: shortcode,\n      tracking_status: trackingStatus,\n      last_checked_at: now.toISOString(),\n      last_growth_at: grew ? now.toISOString() : (prev.last_growth_at || null),\n      last_views: views,\n      last_likes: likes,\n      last_comments: comments,\n      delta_views: deltaViews,\n      delta_likes: deltaLikes,\n      delta_comments: deltaComments,\n      no_growth_checks: noGrowthChecks,\n      next_check_at: nextCheckAt,\n    },\n  };\n});"
+      },
+      "id": "33c7250f-b054-47e5-ba21-91203727322b",
+      "name": "Code: Calculate tracking state",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1424,
+        1248
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "IfyC05aM0eYqTAE7",
+          "mode": "list",
+          "cachedResultName": "IG Metrics Tracking State",
+          "cachedResultUrl": "/projects/Z4xKAmlikaZIHgF6/datatables/IfyC05aM0eYqTAE7"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "url",
+              "keyValue": "={{ $json.tracking_url }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "url": "={{ $json.inputUrl }}",
+            "shortcode": "={{ $json.shortCode }}",
+            "tracking_status": "={{ $json.tracking_status }}",
+            "last_checked_at": "={{ $json.last_checked_at }}",
+            "last_growth_at": "={{ $json.last_growth_at }}",
+            "last_views": "={{ $json.last_views }}",
+            "last_likes": "={{ $json.last_likes }}",
+            "last_comments": "={{ $json.last_comments }}",
+            "delta_views": "={{ $json.delta_views }}",
+            "delta_likes": "={{ $json.delta_likes }}",
+            "delta_comments": "={{ $json.delta_comments }}",
+            "no_growth_checks": "={{ $json.no_growth_checks }}",
+            "next_check_at": "={{ $json.next_check_at }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "shortcode",
+              "displayName": "shortcode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "tracking_status",
+              "displayName": "tracking_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "last_checked_at",
+              "displayName": "last_checked_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "last_growth_at",
+              "displayName": "last_growth_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "last_views",
+              "displayName": "last_views",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "last_likes",
+              "displayName": "last_likes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "last_comments",
+              "displayName": "last_comments",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "delta_views",
+              "displayName": "delta_views",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "delta_likes",
+              "displayName": "delta_likes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "delta_comments",
+              "displayName": "delta_comments",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "no_growth_checks",
+              "displayName": "no_growth_checks",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "next_check_at",
+              "displayName": "next_check_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "d20f1c1d-c943-458b-9f63-1ab86bd2773d",
+      "name": "Upsert tracking state",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        1648,
+        1088
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Tracking state setup\n\nWorkflow now uses the native n8n Data Table before Apify.\n\nCreate/check these columns in the selected Data Table:\n- `url` string\n- `shortcode` string\n- `tracking_status` string\n- `last_checked_at` dateTime\n- `last_growth_at` dateTime\n- `last_views`, `last_likes`, `last_comments` number\n- `delta_views`, `delta_likes`, `delta_comments` number\n- `no_growth_checks` number\n- `next_check_at` dateTime\n\nLogic: new/due posts go to Apify; no-growth posts move to `cooldown` after 1 check and `paused_no_growth` after 3 no-growth checks. Paused posts are rechecked after 7 days.",
+        "height": 420,
+        "width": 420,
+        "color": 4
+      },
+      "id": "39479e7f-fab4-47f7-9618-2eefe8964be9",
+      "name": "READ ME: Tracking state",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        288,
+        704
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Code: Collect URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run an Actor and get dataset": {
+      "main": [
+        [
+          {
+            "node": "Code: Calculate tracking state",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Merge tracking state",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get tracking state",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Collect URLs": {
+      "main": [
+        [
+          {
+            "node": "Run an Actor and get dataset",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get tracking state": {
+      "main": [
+        [
+          {
+            "node": "Merge tracking state",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge tracking state": {
+      "main": [
+        [
+          {
+            "node": "Code: Filter due posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Filter due posts": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code: Calculate tracking state": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Upsert tracking state",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "641300d7-de98-4961-91f6-a58a0cde0816",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b4133111f3c5848c25758b32cbf6eac5c8844e43bb04ededb8c87ee88bcf165a"
+  },
+  "nodeGroups": [],
+  "id": "Nh69PGfPMqXmvv3N",
+  "tags": []
+}
