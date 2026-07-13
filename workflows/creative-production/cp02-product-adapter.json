@@ -1,0 +1,609 @@
+{
+  "name": "cp02 Product Adapter",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        3264,
+        752
+      ],
+      "id": "1bb54725-82ae-4f96-85e5-175adc4db3ae",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1839004881,
+          "mode": "list",
+          "cachedResultName": "for_generating",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit#gid=1839004881"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status",
+              "lookupValue": "dna_extracted"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3712,
+        752
+      ],
+      "id": "1934692b-b925-4814-a317-bbfd89710e6b",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=You are a viral creative strategist adapting organic short-form videos into performance ads for the configured product.\n\nReturn ONLY valid JSON. No markdown. No comments.\n\nYou will receive:\n\n1. Original video breakdown + Creative DNA:\n{{ JSON.stringify($json.adapter_input) }}\n2. Project configuration:\n{{ JSON.stringify($('Pipeline Config').first().json) }}\n\nYour task:\nAdapt the viral structure of the original video to the product while preserving source fidelity.\n\nPreserve unless impossible:\n- concrete visual anchor: person type, location/background, camera style, pacing\n- exact place/interior/background from adapter_input.visual_anchor.canonical.place and adapter_input.visual_anchor.canonical.interior_background\n- source topic when it overlaps with the configured product, its audiences, value propositions, or adjacent user problems\n- emotional arc and viral mechanic\n- simple physical actions that are feasible for AI video\n\nReplace:\n- claims that are too negative, unsafe, or not product-relevant\n- long dialogue with a concise 15-second script\n- brand references with generic \"this app\", \"this tool\", or \"audio reading app\"\n\nHard source-fidelity rules:\n- The Adapter input contains adapter_input.visual_anchor.canonical. Treat it as the source of truth.\n- Copy canonical.raw_visual, canonical.speaker_identity, canonical.place, canonical.interior_background, canonical.camera, and canonical.must_copy into the output visual_anchor. Do not rewrite them into a generic scene.\n- If canonical.raw_visual says \"Woman\", output speaker must say woman. If it says \"Man\", output speaker must say man.\n- If canonical.place or canonical.interior_background says \"Car interior\", output setting/place/interior_background must include car interior.\n- If the source is a man in a car talking to camera, keep a man in a car talking to camera.\n- If the source is a selfie talking-head, keep selfie talking-head framing.\n- If the source already mentions a topic relevant to the configured product, preserve that topic in the hook and script.\n- Do not turn the speaker into a student, woman, room/studio host, classroom scene, or app demo unless the source explicitly supports that.\n- Do not ask the video model to render readable text, book pages, screenshots, app screens, captions, title cards, or overlays. Subtitles and branded outro are added later.\n\nOutput JSON:\n{\n  \"source_fidelity\": {\n    \"visual_anchor_kept\": true,\n    \"topic_anchor_kept\": true,\n    \"source_visual_anchor\": \"\",\n    \"source_topic_anchor\": \"\",\n    \"adaptation_risk\": \"low|medium|high\"\n  },\n  \"visual_anchor\": {\n    \"raw_visual\": \"copy from adapter_input.visual_anchor.canonical.raw_visual\",\n    \"speaker\": \"copy from adapter_input.visual_anchor.canonical.speaker_identity\",\n    \"place\": \"copy from adapter_input.visual_anchor.canonical.place\",\n    \"interior_background\": \"copy from adapter_input.visual_anchor.canonical.interior_background\",\n    \"setting\": \"copy from adapter_input.visual_anchor.canonical.setting\",\n    \"camera\": \"\",\n    \"lighting\": \"\",\n    \"actions\": [],\n    \"must_not_change\": \"copy adapter_input.visual_anchor.canonical.must_copy as an array\"\n  },\n  \"adapted_concept\": \"\",\n  \"reasoning\": \"\",\n  \"new_hook\": \"\",\n  \"new_script_15s\": \"\",\n  \"shot_plan_15s\": [\n    {\"time\": \"00:00-00:03\", \"visual\": \"\", \"dialogue\": \"\"}\n  ],\n  \"production_notes\": [],\n  \"do_not_include\": []\n}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        4544,
+        768
+      ],
+      "id": "e1b4e8c2-e69a-4580-9172-855297e58a68",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "name": "OpenAI API account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        4128,
+        752
+      ],
+      "id": "8121e38e-2a82-434e-be4a-9092c893670b",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1839004881,
+          "mode": "list",
+          "cachedResultName": "for_generating",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit#gid=1839004881"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Adapter": "={{ $json.output[0].content[0].text }}",
+            "status": "adapted",
+            "shortcode": "={{ $('Loop Over Items').item.json.shortcode }}"
+          },
+          "matchingColumns": [
+            "shortcode"
+          ],
+          "schema": [
+            {
+              "id": "shortcode",
+              "displayName": "shortcode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "taken_at_timestamp",
+              "displayName": "taken_at_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "scraped_at",
+              "displayName": "scraped_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "caption",
+              "displayName": "caption",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "like_count",
+              "displayName": "like_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "comment_count",
+              "displayName": "comment_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "play_count",
+              "displayName": "play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ig_play_count",
+              "displayName": "ig_play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "duration_seconds",
+              "displayName": "duration_seconds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "gd_file_id",
+              "displayName": "gd_file_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "link_to_gdrive",
+              "displayName": "link_to_gdrive",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Shortlisted",
+              "displayName": "Shortlisted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Original json file",
+              "displayName": "Original json file",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "DNA_Extractor",
+              "displayName": "DNA_Extractor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Adapter",
+              "displayName": "Adapter",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "final_prompt",
+              "displayName": "final_prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reason_to_skip",
+              "displayName": "reason_to_skip",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "final_prompt_seedance",
+              "displayName": "final_prompt_seedance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "output_kie_seedance",
+              "displayName": "output_kie_seedance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "output_gd_seedance",
+              "displayName": "output_gd_seedance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "seedance_generation_status",
+              "displayName": "seedance_generation_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "seedance_generation_note",
+              "displayName": "seedance_generation_note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "final_prompt_kling",
+              "displayName": "final_prompt_kling",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "output_kie_kling",
+              "displayName": "output_kie_kling",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "output_gd_kling",
+              "displayName": "output_gd_kling",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "kling_generation_status",
+              "displayName": "kling_generation_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "kling_generation_note",
+              "displayName": "kling_generation_note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        4912,
+        768
+      ],
+      "id": "1c2a9ac8-e162-48bd-914a-af0205286d19",
+      "name": "Add adapted information",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d0c03deb-d0d0-48af-aa05-2cdf9b5398d7",
+              "leftValue": "={{ $json.score }}",
+              "rightValue": "={{ $('Pipeline Config').first().json.scoring.min_product_fit_score }}",
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        3920,
+        752
+      ],
+      "id": "8564c11f-aac1-4258-9fd9-2207326591e3",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $('Pipeline Config').first().json;\nfunction cleanJsonText(raw) {\n  let text = raw;\n\n  if (typeof raw === 'object' && raw !== null) {\n    if (raw.parts?.[0]?.text) text = raw.parts[0].text;\n    else if (raw.output?.[0]?.content?.[0]?.text) text = raw.output[0].content[0].text;\n    else text = JSON.stringify(raw);\n  }\n\n  return String(text || '')\n    .replace(/^```json\\s*/i, '')\n    .replace(/^```\\s*/i, '')\n    .replace(/```$/i, '')\n    .trim();\n}\n\nfunction safeParse(raw) {\n  try {\n    return JSON.parse(cleanJsonText(raw));\n  } catch (e) {\n    return null;\n  }\n}\n\nfunction compactDialogue(segments, maxLines = 10) {\n  if (!Array.isArray(segments)) return [];\n  return segments\n    .flatMap(segment => (segment.dialogue || []).map(d => ({\n      timecode: segment.timecode ?? null,\n      speaker: d.speaker ?? null,\n      line: d.line ?? null\n    })))\n    .filter(d => d.line)\n    .slice(0, maxLines);\n}\n\nfunction firstHost(original) {\n  return Array.isArray(original?.people) ? original.people[0] : null;\n}\n\nfunction uniqueLocations(segments) {\n  if (!Array.isArray(segments)) return [];\n  return [...new Set(segments.map(s => s.location).filter(Boolean))].slice(0, 3);\n}\n\nfunction buildCanonicalVisualAnchor(original, host) {\n  const locations = uniqueLocations(original?.segments);\n  const rawVisual = original?.hook?.visual ?? null;\n  const hostParts = [\n    host?.role ? 'role: ' + host.role : null,\n    host?.appearance ? 'appearance: ' + host.appearance : null,\n    host?.outfit ? 'outfit: ' + host.outfit : null,\n    host?.key_action ? 'action: ' + host.key_action : null\n  ].filter(Boolean);\n\n  const settingParts = [\n    locations.length ? 'place/location: ' + locations.join(', ') : null,\n    rawVisual ? 'hook visual: ' + rawVisual : null\n  ].filter(Boolean);\n\n  return {\n    raw_visual: rawVisual,\n    speaker_identity: hostParts.join('; ') || rawVisual || null,\n    place: locations[0] ?? null,\n    interior_background: locations.join(', ') || rawVisual || null,\n    setting: settingParts.join('; ') || null,\n    camera: original?.style?.camera ?? null,\n    lighting: original?.style?.lighting ?? null,\n    pacing: original?.style?.pacing ?? null,\n    transitions: original?.style?.transitions ?? null,\n    must_copy: [\n      rawVisual ? 'raw visual: ' + rawVisual : null,\n      locations.length ? 'place/interior/background: ' + locations.join(', ') : null,\n      original?.style?.camera ? 'camera: ' + original.style.camera : null,\n      host?.appearance ? 'speaker appearance: ' + host.appearance : null,\n      host?.outfit ? 'outfit: ' + host.outfit : null\n    ].filter(Boolean)\n  };\n}\n\nreturn items.map(item => {\n  const original = safeParse(item.json['Original json file']);\n  const dna = safeParse(item.json.DNA_Extractor);\n  const host = firstHost(original);\n  const canonicalVisualAnchor = buildCanonicalVisualAnchor(original, host);\n\n  const compactOriginal = {\n    project: original?.project ?? null,\n    format: original?.format ?? null,\n    structure: original?.structure ?? null,\n    core_idea: original?.core_idea ?? null,\n    channel: original?.channel ?? null,\n    hook: original?.hook ?? null,\n    style: original?.style ?? null,\n    people: Array.isArray(original?.people) ? original.people.slice(0, 3) : [],\n    dialogue_sample: compactDialogue(original?.segments, 10),\n    segment_summaries: Array.isArray(original?.segments)\n      ? original.segments.slice(0, 6).map(segment => ({\n          timecode: segment.timecode ?? null,\n          location: segment.location ?? null,\n          action: segment.action ?? null,\n          purpose: segment.purpose ?? null,\n          dialogue_lines: (segment.dialogue || []).map(d => d.line).filter(Boolean).slice(0, 2),\n          captions: (segment.captions || []).map(c => c.text).filter(Boolean).slice(0, 2)\n        }))\n      : [],\n    overlays: Array.isArray(original?.overlays) ? original.overlays.slice(0, 8) : [],\n    format_dna: original?.format_dna ?? null\n  };\n\n  item.json.adapter_input = {\n    source_fidelity: {\n      rule: 'Preserve the original source format and concrete visual anchor unless it conflicts with the product adaptation or AI feasibility.',\n      must_preserve_when_present: [\n        'speaker count and role',\n        'speaker gender/age range as observed',\n        'main location/background',\n        'selfie/talking-head/street-interview camera style',\n        'pacing and cut pattern',\n        'original topic if it already overlaps with the configured product, its audiences, value propositions, and adjacent user problems'\n      ],\n      do_not_generalize: [\n        'Do not replace a car selfie with a generic bedroom, classroom, or studio.',\n        'Do not change a male host into a female host or a student unless the source says that.',\n        'Do not remove a topic relevant to the configured product if the source already contains it.'\n      ]\n    },\n    original_video: compactOriginal,\n    visual_anchor: {\n      canonical: canonicalVisualAnchor,\n      source_hook_visual: original?.hook?.visual ?? null,\n      source_setting: uniqueLocations(original?.segments),\n      source_camera: original?.style?.camera ?? null,\n      source_lighting: original?.style?.lighting ?? null,\n      source_pacing: original?.style?.pacing ?? null,\n      source_transitions: original?.style?.transitions ?? null,\n      source_host: host ? {\n        role: host.role ?? null,\n        appearance: host.appearance ?? null,\n        outfit: host.outfit ?? null,\n        key_action: host.key_action ?? null\n      } : null\n    },\n    creative_dna: dna,\n    product: {\n      ...config.product,\n      brand_mention_policy: 'avoid spoken brand mentions; final branded outro will be added separately',\n      text_rendering_policy: 'video models should not render readable text; captions/subtitles/brand cards will be added in post'\n    }\n  };\n\n  return item;\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4368,
+        768
+      ],
+      "id": "4b3fc78d-0be9-4c5e-85fe-6657053af7e7",
+      "name": "Prepare Adapter Input"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    product: {\n      name: \"Speechify\",\n      description: \"An app that turns books, PDFs, articles, emails, and documents into audio using AI voices.\",\n      audiences: [\"people with ADHD or focus challenges\", \"students\", \"professionals\", \"busy readers\"],\n      value_props: [\"save time\", \"listen instead of read\", \"consume more content\", \"learn while multitasking\"],\n      target_markets: [\"US\", \"CA\", \"GB\", \"AU\"]\n    },\n    scoring: {\n      allowed_languages: [\"en\"],\n      max_source_duration_sec: 60,\n      target_video_duration_sec: 15,\n      min_product_fit_score: 0.60,\n      min_ai_video_generation_score: 0.60,\n      reject_local_or_cultural_concepts: true\n    },\n    generation: {\n      aspect_ratio: \"9:16\",\n      seedance_model: \"bytedance/seedance-2\",\n      kling_model: \"kling-3.0/video\"\n    }\n  }\n}];"
+      },
+      "id": "pipeline-config-fUx11ZsfldXJdXUo",
+      "name": "Pipeline Config",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3504,
+        752
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Pipeline Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Add adapted information",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Prepare Adapter Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add adapted information": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Adapter Input": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pipeline Config": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "7a85b449-c9bb-4c40-881d-7373f60b61ad",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b4133111f3c5848c25758b32cbf6eac5c8844e43bb04ededb8c87ee88bcf165a"
+  },
+  "nodeGroups": [],
+  "id": "fUx11ZsfldXJdXUo",
+  "tags": []
+}

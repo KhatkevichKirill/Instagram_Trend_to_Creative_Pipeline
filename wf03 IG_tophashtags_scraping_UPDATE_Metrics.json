@@ -6,10 +6,8 @@
         "operation": "update",
         "documentId": {
           "__rl": true,
-          "value": "1ah3Lz5Opg7GaHMxjZ0h3a-vaZBJ5XEeBX66iONJ46ks",
-          "mode": "list",
-          "cachedResultName": "Instagram Trend Discovery Pipeline",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit?usp=drivesdk"
+          "value": "15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888",
+          "mode": "id"
         },
         "sheetName": {
           "__rl": true,
@@ -468,8 +466,7 @@
       "name": "Update row in sheet",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "KfwbD2ROouMFmFE6",
-          "name": "Kirill Speechify"
+          "name": "Google Sheets account"
         }
       }
     },
@@ -510,7 +507,6 @@
       "name": "Run an Actor and get dataset",
       "credentials": {
         "apifyApi": {
-          "id": "EI4FKRX4VPKCfMpO",
           "name": "Apify account"
         }
       }
@@ -519,10 +515,8 @@
       "parameters": {
         "documentId": {
           "__rl": true,
-          "value": "1ah3Lz5Opg7GaHMxjZ0h3a-vaZBJ5XEeBX66iONJ46ks",
-          "mode": "list",
-          "cachedResultName": "IG Reels scraper",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit?usp=drivesdk"
+          "value": "15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888",
+          "mode": "id"
         },
         "sheetName": {
           "__rl": true,
@@ -550,8 +544,7 @@
       "name": "Get row(s) in sheet",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "KfwbD2ROouMFmFE6",
-          "name": "Kirill Speechify"
+          "name": "Google Sheets account"
         }
       }
     },

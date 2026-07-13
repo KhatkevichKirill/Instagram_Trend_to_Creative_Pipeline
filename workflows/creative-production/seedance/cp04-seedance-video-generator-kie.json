@@ -1,0 +1,1215 @@
+{
+  "name": "cp04 Seedance Video Generator (Kie.ai)",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        16,
+        560
+      ],
+      "id": "7f2854d4-de7e-4d51-8ad2-3c1867aa74df",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1839004881,
+          "mode": "list",
+          "cachedResultName": "for_generating",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit#gid=1839004881"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status",
+              "lookupValue": "adapted"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        560
+      ],
+      "id": "0ca42054-cdb2-42f0-a438-1752367f69ec",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/api/v1/jobs/createTask",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.kie_payload }}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 3000
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1344,
+        496
+      ],
+      "id": "5c9b7403-0c8a-4e07-a2b3-96f4eff210e0",
+      "name": "Create Video",
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "Kie.ai API key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        896,
+        560
+      ],
+      "id": "cc1912f1-e34b-40dd-b1dc-e68ae43d8e62",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "amount": 3,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1568,
+        496
+      ],
+      "id": "ead09c24-2e95-4947-af4b-1ac5231954bd",
+      "name": "Wait",
+      "webhookId": "6208ad72-844f-41ca-a546-d2575ba1b749"
+    },
+    {
+      "parameters": {
+        "url": "={{ `https://api.kie.ai/api/v1/jobs/recordInfo?taskId=${$json.data?.taskId || $json.taskId || \"\"}` }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1792,
+        416
+      ],
+      "id": "fd57c479-3f13-4241-99a5-7a1701c83c4a",
+      "name": "Fetch request status",
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "Kie.ai API key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c3d09b92-fd10-4a4c-8216-054d0ab73408",
+              "leftValue": "={{ $json.data?.state || $json.state || \"\" }}",
+              "rightValue": "success",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2016,
+        496
+      ],
+      "id": "7bbf6047-0131-498d-a65b-a606ba45051b",
+      "name": "If ready"
+    },
+    {
+      "parameters": {
+        "url": "={{ `https://api.kie.ai/api/v1/jobs/recordInfo?taskId=${$json.data?.taskId || $json.taskId || \"\"}` }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2240,
+        496
+      ],
+      "id": "92e9d84b-d3a8-464e-a7ca-5d4eceb36403",
+      "name": "Get the result",
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "Kie.ai API key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "driveId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_DRIVE_ID",
+          "mode": "id"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "YOUR_OUTPUT_FOLDER_ID",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2912,
+        496
+      ],
+      "id": "95bb7eab-5fb0-479f-ad34-5c3fcebba094",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1839004881,
+          "mode": "list",
+          "cachedResultName": "for_generating",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit#gid=1839004881"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "output_gd_seedance": "=https://drive.google.com/file/d/{{ $json.id }}/view?usp=sharing",
+            "seedance_generation_status": "seedance_generated",
+            "seedance_generation_note": "={{ `prompt_chars=${$(\"Loop Over Items\").item.json.compiled_prompt_length || \"\"}` }}",
+            "shortcode": "={{ $('Loop Over Items').item.json.shortcode }}"
+          },
+          "matchingColumns": [
+            "shortcode"
+          ],
+          "schema": [
+            {
+              "id": "shortcode",
+              "displayName": "shortcode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "taken_at_timestamp",
+              "displayName": "taken_at_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "scraped_at",
+              "displayName": "scraped_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "caption",
+              "displayName": "caption",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "like_count",
+              "displayName": "like_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "comment_count",
+              "displayName": "comment_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "play_count",
+              "displayName": "play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ig_play_count",
+              "displayName": "ig_play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "duration_seconds",
+              "displayName": "duration_seconds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "gd_file_id",
+              "displayName": "gd_file_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "link_to_gdrive",
+              "displayName": "link_to_gdrive",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Shortlisted",
+              "displayName": "Shortlisted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Original json file",
+              "displayName": "Original json file",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "DNA_Extractor",
+              "displayName": "DNA_Extractor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Adapter",
+              "displayName": "Adapter",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "final_prompt",
+              "displayName": "final_prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reason_to_skip",
+              "displayName": "reason_to_skip",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "final_prompt_seedance",
+              "displayName": "final_prompt_seedance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "output_kie_seedance",
+              "displayName": "output_kie_seedance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "output_gd_seedance",
+              "displayName": "output_gd_seedance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "seedance_generation_status",
+              "displayName": "seedance_generation_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "seedance_generation_note",
+              "displayName": "seedance_generation_note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "final_prompt_kling",
+              "displayName": "final_prompt_kling",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "output_kie_kling",
+              "displayName": "output_kie_kling",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "output_gd_kling",
+              "displayName": "output_gd_kling",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "kling_generation_status",
+              "displayName": "kling_generation_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "kling_generation_note",
+              "displayName": "kling_generation_note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3136,
+        496
+      ],
+      "id": "24b28e7d-e107-431e-b2e7-1bf9e890c5c6",
+      "name": "Save Drive Seedance Link",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1839004881,
+          "mode": "list",
+          "cachedResultName": "for_generating",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit#gid=1839004881"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "output_kie_seedance": "={{ (() => { const d = $json.data || $json; let r = d.resultJson ?? d.result ?? null; if (typeof r === \"string\") { try { r = JSON.parse(r); } catch (_) {} } const u = d.video?.url || d.url || r?.video?.url || r?.url || r?.resultUrl || r?.result_url || (Array.isArray(r?.resultUrls) ? r.resultUrls[0] : null) || (Array.isArray(r?.videos) ? (r.videos[0]?.url || r.videos[0]) : null) || (Array.isArray(r?.video_urls) ? r.video_urls[0] : null); return u || \"\"; })() }}",
+            "seedance_generation_status": "kie_result_ready",
+            "seedance_generation_note": "={{ `prompt_chars=${$(\"Loop Over Items\").item.json.compiled_prompt_length || \"\"}` }}",
+            "shortcode": "={{ $('Loop Over Items').item.json.shortcode }}"
+          },
+          "matchingColumns": [
+            "shortcode"
+          ],
+          "schema": [
+            {
+              "id": "shortcode",
+              "displayName": "shortcode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "taken_at_timestamp",
+              "displayName": "taken_at_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "scraped_at",
+              "displayName": "scraped_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "caption",
+              "displayName": "caption",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "like_count",
+              "displayName": "like_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "comment_count",
+              "displayName": "comment_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "play_count",
+              "displayName": "play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ig_play_count",
+              "displayName": "ig_play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "duration_seconds",
+              "displayName": "duration_seconds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "gd_file_id",
+              "displayName": "gd_file_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "link_to_gdrive",
+              "displayName": "link_to_gdrive",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Shortlisted",
+              "displayName": "Shortlisted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Original json file",
+              "displayName": "Original json file",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "DNA_Extractor",
+              "displayName": "DNA_Extractor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Adapter",
+              "displayName": "Adapter",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "final_prompt",
+              "displayName": "final_prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reason_to_skip",
+              "displayName": "reason_to_skip",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "final_prompt_seedance",
+              "displayName": "final_prompt_seedance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "output_kie_seedance",
+              "displayName": "output_kie_seedance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "output_gd_seedance",
+              "displayName": "output_gd_seedance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "seedance_generation_status",
+              "displayName": "seedance_generation_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "seedance_generation_note",
+              "displayName": "seedance_generation_note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "final_prompt_kling",
+              "displayName": "final_prompt_kling",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "output_kie_kling",
+              "displayName": "output_kie_kling",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "output_gd_kling",
+              "displayName": "output_gd_kling",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "kling_generation_status",
+              "displayName": "kling_generation_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "kling_generation_note",
+              "displayName": "kling_generation_note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2464,
+        496
+      ],
+      "id": "754a02a2-cd7f-4ae1-866e-97bb062d97ba",
+      "name": "Save Kie Seedance Link",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ (() => { const d = $(\"Get the result\").item.json.data || $(\"Get the result\").item.json; let r = d.resultJson ?? d.result ?? null; if (typeof r === \"string\") { try { r = JSON.parse(r); } catch (_) {} } const u = d.video?.url || d.url || r?.video?.url || r?.url || r?.resultUrl || r?.result_url || (Array.isArray(r?.resultUrls) ? r.resultUrls[0] : null) || (Array.isArray(r?.videos) ? (r.videos[0]?.url || r.videos[0]) : null) || (Array.isArray(r?.video_urls) ? r.video_urls[0] : null); return u || \"\"; })() }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2688,
+        496
+      ],
+      "id": "59676f06-9e0c-4fde-b6e1-160a4cf90984",
+      "name": "Download video"
+    },
+    {
+      "parameters": {
+        "jsCode": "const productName = $('Pipeline Config').first().json.product.name;\nconst escapedProductName = String(productName).replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\nconst productNamePattern = new RegExp(escapedProductName, 'i');\nconst config = $('Pipeline Config').first().json;\nconst items = $input.all();\n\nconst SOURCE_COLUMN = \"final_prompt_seedance\";\n\nconst clean = (v) => String(v ?? \"\").replace(/\\s+/g, \" \").trim();\n\nfunction getSourceValue(json) {\n  if (Object.prototype.hasOwnProperty.call(json, SOURCE_COLUMN)) {\n    return json[SOURCE_COLUMN];\n  }\n\n  const fallbackKey = Object.keys(json).find((key) =>\n    clean(key).toLowerCase() === SOURCE_COLUMN.toLowerCase()\n  );\n\n  if (fallbackKey) return json[fallbackKey];\n\n  const availableKeys = Object.keys(json).join(\", \");\n  throw new Error(`Column not found: \"${SOURCE_COLUMN}\". Available columns: ${availableKeys}`);\n}\n\nfunction safeParseJsonString(raw) {\n  if (typeof raw !== \"string\") {\n    throw new Error(`Source column is not a string. Got: ${typeof raw}`);\n  }\n\n  let s = raw\n    .trim()\n    .replace(/^```json\\s*/i, \"\")\n    .replace(/^```\\s*/i, \"\")\n    .replace(/\\s*```$/i, \"\")\n    .trim();\n\n  if (!s) throw new Error(`Source column \"${SOURCE_COLUMN}\" is empty.`);\n\n  try {\n    return JSON.parse(s);\n  } catch (_) {}\n\n  const first = s.indexOf(\"{\");\n  const last = s.lastIndexOf(\"}\");\n  if (first !== -1 && last !== -1 && last > first) {\n    try {\n      return JSON.parse(s.slice(first, last + 1));\n    } catch (_) {}\n  }\n\n  throw new Error(`Could not parse JSON from column \"${SOURCE_COLUMN}\". First 300 chars: ${s.slice(0, 300)}`);\n}\n\nfunction normalizeDuration(value) {\n  const raw = clean(value || \"15\").toLowerCase();\n  const match = raw.match(/\\d+/);\n  if (!match) return 15;\n  return Math.max(4, Math.min(15, Number(match[0])));\n}\n\nfor (const { json } of items) {\n  const src = safeParseJsonString(getSourceValue(json));\n  const seedance = src.seedance || {};\n  const prompt = clean(seedance.prompt);\n\n  if (!prompt) {\n    throw new Error(`seedance.prompt is empty for id=${json.id || \"unknown\"}`);\n  }\n\n  if (prompt.length > 5000) {\n    throw new Error(`seedance.prompt is too long for id=${json.id || \"unknown\"}: ${prompt.length} chars`);\n  }\n\n  const dialogue = JSON.stringify(src.creative_brief?.dialogue || []);\n  if (productNamePattern.test(dialogue)) {\n    throw new Error(`Spoken dialogue contains the configured product brand for id=${json.id || \"unknown\"}`);\n  }\n\n  json.content_type = \"seedance_prompt_mvp\";\n  json.kie_payload = {\n    model: config.generation.seedance_model,\n    input: {\n      prompt,\n      duration: normalizeDuration(seedance.duration_sec || src.creative_brief?.duration_sec),\n      aspect_ratio: clean(seedance.aspect_ratio || src.creative_brief?.aspect_ratio) || config.generation.aspect_ratio,\n      resolution: clean(seedance.resolution) || \"1080p\",\n      generate_audio: seedance.generate_audio ?? true,\n    },\n  };\n  json.compiled_prompt_length = prompt.length;\n  json.source_column_used = SOURCE_COLUMN;\n  json.seedance_negative_prompt = clean(seedance.negative_prompt);\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        496
+      ],
+      "id": "fa9b4601-64f5-44f0-962d-f629f4d278dd",
+      "name": "Build Kie Seedance Payload"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "seedance-prompt-not-empty",
+              "leftValue": "={{ $json['final_prompt_seedance'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "seedance-output-empty",
+              "leftValue": "={{ $json['output_gd_seedance'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        656,
+        560
+      ],
+      "id": "a7730f62-8846-4496-b4d6-59662cbceb5a",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    product: {\n      name: \"Speechify\",\n      description: \"An app that turns books, PDFs, articles, emails, and documents into audio using AI voices.\",\n      audiences: [\"people with ADHD or focus challenges\", \"students\", \"professionals\", \"busy readers\"],\n      value_props: [\"save time\", \"listen instead of read\", \"consume more content\", \"learn while multitasking\"],\n      target_markets: [\"US\", \"CA\", \"GB\", \"AU\"]\n    },\n    scoring: {\n      allowed_languages: [\"en\"],\n      max_source_duration_sec: 60,\n      target_video_duration_sec: 15,\n      min_product_fit_score: 0.60,\n      min_ai_video_generation_score: 0.60,\n      reject_local_or_cultural_concepts: true\n    },\n    generation: {\n      aspect_ratio: \"9:16\",\n      seedance_model: \"bytedance/seedance-2\",\n      kling_model: \"kling-3.0/video\"\n    }\n  }\n}];"
+      },
+      "id": "pipeline-config-rMfgqj3iqfkMzMSY",
+      "name": "Pipeline Config",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        256,
+        560
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Pipeline Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Build Kie Seedance Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Video": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Fetch request status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch request status": {
+      "main": [
+        [
+          {
+            "node": "If ready",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If ready": {
+      "main": [
+        [
+          {
+            "node": "Get the result",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get the result": {
+      "main": [
+        [
+          {
+            "node": "Save Kie Seedance Link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Save Drive Seedance Link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download video": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Kie Seedance Payload": {
+      "main": [
+        [
+          {
+            "node": "Create Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Kie Seedance Link": {
+      "main": [
+        [
+          {
+            "node": "Download video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Drive Seedance Link": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pipeline Config": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "be7d4463-aae3-4ddb-83d4-d141b99d19e7",
+  "meta": {
+    "instanceId": "b4133111f3c5848c25758b32cbf6eac5c8844e43bb04ededb8c87ee88bcf165a"
+  },
+  "nodeGroups": [],
+  "id": "rMfgqj3iqfkMzMSY",
+  "tags": []
+}

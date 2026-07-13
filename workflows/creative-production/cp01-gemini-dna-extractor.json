@@ -1,0 +1,976 @@
+{
+  "name": "cp01 Gemini Creative DNA Extractor",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "1ef78734-54b3-4db6-a60f-7ea28d03d67b",
+      "name": "When clicking Execute workflow",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1856,
+        1664
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1839004881,
+          "mode": "list",
+          "cachedResultName": "for_generating",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit#gid=1839004881"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Shortlisted",
+              "lookupValue": "Yes"
+            },
+            {
+              "lookupColumn": "status",
+              "lookupValue": "queued"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "95904057-7f82-4195-ae0d-557872bfeac6",
+      "name": "Get generated rows",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1376,
+        1664
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "220d5f47-06da-4b5b-8760-c5f47c6a8d7a",
+      "name": "Loop Over Rows",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -1072,
+        1664
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "text": "You are an ad creative video analyst.\nReturn ONLY valid JSON. No markdown, no comments.\n\nTask:\nAnalyze one organic short-form video and extract its reusable creative structure.\nFocus on what makes the video work, not on visual trivia.\n\nInput:\nYou will receive a detailed video breakdown JSON.\n\nProject configuration:\n{{ JSON.stringify($('Pipeline Config').first().json) }}\n\nOutput schema:\n{\n  \"video_duration_sec\": number|null,\n  \"main_video_language\": string|null,\n\n  \"primary_format\": string,\n  \"core_mechanic\": string|null,\n\n  \"hook_type\": string,\n  \"hook_text\": string|null,\n\n  \"primary_angle\": string,\n  \"dominant_emotion\": string,\n  \"emotional_arc\": [string],\n\n  \"viral_mechanics\": [string],\n  \"psychological_triggers\": [string],\n\n  \"pattern\": {\n    \"structure\": string|null,\n    \"responses_count\": number|null,\n    \"response_consistency\": string|null,\n    \"final_answer_expands_reasoning\": boolean|null\n  },\n\n  \"script_summary\": string|null,\n  \"on_screen_text\": [string],\n\n  \"adaptation_notes\": {\n    \"what_to_keep\": [string],\n    \"what_to_change\": [string],\n    \"product_adaptation_potential\": string|null\n  },\n\n  \"can_be_compressed_to_15_sec\": boolean|null,\n  \"ai_video_generation_score\": number|null,\n\n  \"product_fit\": {\n    \"score\": number|null,\n    \"product_relevance\": number|null,\n    \"format_transferability\": number|null,\n    \"market_fit\": number|null,\n    \"message_clarity\": number|null,\n    \"product_integration_risk\": number|null,\n    \"reason\": string|null\n  },\n\n  \"skip_reason\": string|null,\n  \"confidence_score\": number|null\n}\n\nTaxonomy constraints:\n- main_video_language: ISO 639-1 language code, for example \"en\", \"es\", \"pt\", \"my\", \"zh\", \"ja\", \"ko\". Use null if unknown.\n- hook_type: one of [\"problem\",\"hypothetical-question\",\"curiosity\",\"social-proof\",\"fear\",\"story\",\"offer\",\"question\",\"none\"]\n- primary_angle: one of [\"pain\",\"aspiration\",\"demo\",\"testimonial\",\"comparison\",\"offer\",\"education\",\"ugc-lifestyle\",\"entertainment\",\"none\"]\n- primary_format: one of [\"talking-head\",\"ugc\",\"screencast\",\"cinematic\",\"voiceover-broll\",\"static-slides\",\"street-interview\",\"podcast\",\"standup\",\"music-performance\",\"dance\",\"prank\",\"vlog\",\"none\"]\n- core_mechanic: short normalized description of the actual reusable mechanism, not the surface format. Use lowercase kebab-case.\n  Examples: \"moral-dilemma\", \"audio-reaction-rating\", \"before-after-demo\", \"product-demo\", \"social-proof-repetition\", \"personal-confession\", \"expert-insight\", \"myth-busting\", \"music-performance\", \"dance-performance\", \"spontaneous-performance\", \"chaotic-crowd-energy\".\n- dominant_emotion: one of [\"urgency\",\"trust\",\"excitement\",\"calm\",\"fear\",\"hope\",\"curiosity\",\"funny\",\"wholesome\",\"neutral\",\"none\"]\n- skip_reason: one of [null,\"non-english\",\"too-long\",\"cannot-compress-to-15-sec\",\"low-product-fit\",\"low-ai-video-generation-fit\",\"music-or-dance-dependent\",\"too-local-or-cultural\",\"unclear-structure\",\"none\"]\n\nRules:\n1. If unsure, use null for free-text fields and \"none\" for taxonomy fields.\n2. Arrays must be short: 1-5 items max.\n3. Use lowercase kebab-case for array values.\n4. Do not describe clothes, hair, exact locations, or camera details unless they are central to the format.\n5. Extract the reusable creative pattern, not a shot-by-shot summary.\n6. confidence_score must be between 0 and 1.\n7. ai_video_generation_score must be between 0 and 1.\n8. All product_fit sub-scores and product_fit.score must be between 0 and 1.\n9. No extra keys.\n\nImportant distinction:\nprimary_format describes how the video looks.\ncore_mechanic describes why the video works.\n\nExamples:\n- primary_format = \"street-interview\", core_mechanic = \"moral-dilemma\"\n- primary_format = \"street-interview\", core_mechanic = \"audio-reaction-rating\"\n- primary_format = \"street-interview\", core_mechanic = \"music-performance\"\n- primary_format = \"podcast\", core_mechanic = \"expert-insight\"\n- primary_format = \"ugc\", core_mechanic = \"before-after-demo\"\n\nCompression rule:\ncan_be_compressed_to_15_sec = true only if the core creative mechanism can survive as a coherent ~15-second video.\nSet false if the concept requires a long narrative, many scenes, many characters, a long performance, or extended context.\n\nCompression vs clarity:\nmessage_clarity measures how quickly the core idea can be understood.\nDo not confuse message clarity with story compression.\n\nA video may have a clear message but still be impossible to compress into 15 seconds.\nExample:\n- \"What is your favorite song?\" is clear.\n- But repeating the full question → answer → listen → reaction → rating loop across multiple people may not compress well into 15 seconds.\n\nAI video generation score:\nai_video_generation_score measures how suitable the reusable structure is for current AI video generation systems with the configured target_video_duration_sec limit.\n\nScore lower if the video depends on:\n- consistent characters across many scenes\n- complex choreography\n- music performance\n- repeated multi-person interactions\n- spontaneous crowd energy\n- live singing or dancing\n- music taste/reaction\n- exact timing of reactions\n- many location changes\n- precise physical comedy\n- long dialogue\n- local/cultural context\n- text-heavy screenshots\n- complex app UI\n\nScore higher if it can work as:\n- one speaker\n- simple street interview\n- short testimonial\n- podcast-style clip\n- simple UGC scene\n- voiceover with simple b-roll\n- clear before/after or demo structure\n\nProduct fit score:\nproduct_fit.score measures how suitable the original video's reusable creative structure is for adaptation into a ad for the configured product for the configured target markets.\n\nCompute:\nproduct_fit.score =\n0.30 * product_relevance +\n0.25 * format_transferability +\n0.20 * market_fit +\n0.15 * message_clarity +\n0.10 * product_integration_risk\n\nScoring factors:\n\n1. product_relevance\n- 1.0: directly maps to the configured product, audiences, value propositions, or target use cases\n- 0.7: indirectly maps to adjacent needs, habits, goals, or emotional benefits\n- 0.4: weakly maps through a broad emotional or lifestyle angle\n- 0.0: no clear connection to the configured product\n\n2. format_transferability\n- 1.0: easy to adapt as talking-head, street interview, testimonial, podcast clip, UGC, demo, voiceover-broll\n- 0.5: possible but requires major rewriting\n- 0.0: depends on music, dance, local culture, prank, celebrity, or highly visual gimmick\n\nImportant:\nformat_transferability must evaluate whether the original video's core creative mechanism can be reused for the configured product, not just whether the surface format can be reused.\n\nSurface format is not enough.\nExamples:\n- Street interview about a configured audience problem or product use case = high.\n- Street interview based on music reactions, singing, dancing, chaotic crowd energy, local slang, or regional humor = low/medium.\n- Podcast clip with an insight relevant to the configured audience or value propositions = high.\n- Podcast clip relying on celebrity gossip, local drama, or inside jokes = low.\n\nIf the surface format is transferable but the core mechanism is not, score format_transferability low or medium.\n\n3. market_fit\n- 1.0: works naturally for the configured target markets\n- 0.5: culturally specific but adaptable\n- 0.0: strongly tied to non-English language, local references, local celebrities, or regional memes\n\n4. message_clarity\n- 1.0: simple idea that can be understood in 1-2 seconds\n- 0.5: needs context but can be simplified\n- 0.0: complex narrative, inside joke, or unclear premise\n\nImportant:\nmessage_clarity measures only whether the core idea is easy to understand.\nIt does not mean the concept can be compressed into 15 seconds.\n\n5. product_integration_risk\n- 1.0: the configured product can be integrated naturally without feeling forced\n- 0.5: possible but may feel like a stretch\n- 0.0: product integration would feel unnatural or break the concept\n\nHard score caps:\n- If main_video_language is not included in the configured allowed_languages, product_fit.score must be <= 0.30\n- If video_duration_sec exceeds the configured max_source_duration_sec, product_fit.score must be <= 0.40\n- If can_be_compressed_to_15_sec = false, product_fit.score must be <= 0.40\n- If the core mechanism depends on music, singing, dancing, rhythm, local slang, regional humor, or cultural references, product_fit.score must be <= 0.45\n- If product_relevance = 0.0, product_fit.score must be <= 0.55\n- If product_integration_risk <= 0.5, product_fit.score must be <= 0.60\n- If skip_reason is not \"none\", product_fit.score should usually be below 0.50 unless the only issue is minor compression.\n\nSkip logic:\nSet skip_reason to the root cause that most limits adaptation potential, not simply the first applicable rule.\nHard skip rules override all scores.\n\n- \"non-english\" if the main blocker is that the video depends on non-English language.\n- \"too-long\" if video_duration_sec exceeds the configured max_source_duration_sec and the core mechanism needs the full length.\n- \"cannot-compress-to-15-sec\" if the core mechanism cannot survive as a coherent ~15-second video.\n- \"music-or-dance-dependent\" if the core mechanism depends on music, singing, dancing, rhythm, live performance, or musical taste.\n- \"too-local-or-cultural\" if the concept depends heavily on local culture, local slang, local celebrities, regional memes, or non-Western cultural context.\n- \"low-product-fit\" if the main issue is weak relevance to the configured product.\n- \"low-ai-video-generation-fit\" if the main issue is production difficulty for AI video models.\n- \"unclear-structure\" if the reusable creative pattern is unclear.\n- \"none\" only if the video should continue to the Adapter step.",
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -464,
+        1680
+      ],
+      "id": "dd2e896a-a7e7-4159-b293-17fb7c6661f0",
+      "name": "Classify visible text with Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "name": "Google Gemini API account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1839004881,
+          "mode": "list",
+          "cachedResultName": "for_generating",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit#gid=1839004881"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "=analyzed",
+            "DNA_Extractor": "={{ $json.content }}",
+            "shortcode": "={{ $('Loop Over Rows').item.json.shortcode }}"
+          },
+          "matchingColumns": [
+            "shortcode"
+          ],
+          "schema": [
+            {
+              "id": "shortcode",
+              "displayName": "shortcode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "taken_at_timestamp",
+              "displayName": "taken_at_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "scraped_at",
+              "displayName": "scraped_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "caption",
+              "displayName": "caption",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "like_count",
+              "displayName": "like_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "comment_count",
+              "displayName": "comment_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "play_count",
+              "displayName": "play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ig_play_count",
+              "displayName": "ig_play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "duration_seconds",
+              "displayName": "duration_seconds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "gd_file_id",
+              "displayName": "gd_file_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "link_to_gdrive",
+              "displayName": "link_to_gdrive",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Shortlisted",
+              "displayName": "Shortlisted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Original json file",
+              "displayName": "Original json file",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "DNA_Extractor",
+              "displayName": "DNA_Extractor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Adapter",
+              "displayName": "Adapter",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "final_prompt",
+              "displayName": "final_prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reason_to_skip",
+              "displayName": "reason_to_skip",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "final_prompt_seedance",
+              "displayName": "final_prompt_seedance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "output_kie_seedance",
+              "displayName": "output_kie_seedance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "output_gd_seedance",
+              "displayName": "output_gd_seedance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "seedance_generation_status",
+              "displayName": "seedance_generation_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "seedance_generation_note",
+              "displayName": "seedance_generation_note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "final_prompt_kling",
+              "displayName": "final_prompt_kling",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "output_kie_kling",
+              "displayName": "output_kie_kling",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "output_gd_kling",
+              "displayName": "output_gd_kling",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "kling_generation_status",
+              "displayName": "kling_generation_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "kling_generation_note",
+              "displayName": "kling_generation_note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "3c53306a-e302-4454-8972-65e350a02d50",
+      "name": "Save text gate result",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -256,
+        1680
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://www.googleapis.com/drive/v3/files/{{ $json.gd_file_id }}?alt=media",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDriveOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -768,
+        1680
+      ],
+      "id": "d26207a2-ce65-4e76-a577-447cb0a3fa5e",
+      "name": "HTTP Request",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $('Pipeline Config').first().json;\n\nreturn items.map(item => {\n  const raw = item.json.DNA_Extractor;\n  let text = raw;\n\n  if (typeof raw === 'object' && raw !== null) {\n    text = raw.parts?.[0]?.text || JSON.stringify(raw);\n  }\n\n  text = String(text)\n    .replace(/^\\x60\\x60\\x60json\\s*/i, '')\n    .replace(/^\\x60\\x60\\x60\\s*/i, '')\n    .replace(/\\x60\\x60\\x60$/i, '')\n    .trim();\n\n  try {\n    const parsed = JSON.parse(text);\n    const score = parsed?.product_fit?.score ?? null;\n    const skipReason = parsed?.skip_reason;\n    const explicitSkip = skipReason && !['none', 'null'].includes(String(skipReason).toLowerCase());\n    const passesScore = Number(score) >= Number(config.scoring.min_product_fit_score);\n\n    item.json.product_fit_score = score;\n    item.json.product_fit_reason = parsed?.product_fit?.reason ?? null;\n    item.json.skip_reason = explicitSkip ? skipReason : null;\n    item.json.pipeline_status = !explicitSkip && passesScore ? 'dna_extracted' : 'skipped';\n    item.json.decision_reason = explicitSkip ? skipReason : (parsed?.product_fit?.reason ?? 'below-product-fit-threshold');\n  } catch (error) {\n    item.json.product_fit_score = null;\n    item.json.pipeline_status = 'analysis_error';\n    item.json.decision_reason = `JSON parse error: ${error.message}`;\n  }\n\n  return item;\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -32,
+        1680
+      ],
+      "id": "214741d9-c15e-433b-a76e-403be7a00617",
+      "name": "DNA_Extractor"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1839004881,
+          "mode": "list",
+          "cachedResultName": "for_generating",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit#gid=1839004881"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "score": "={{ $json.product_fit_score }}",
+            "reason_to_skip": "={{ $json.decision_reason }}",
+            "shortcode": "={{ $('HTTP Request').item.json.shortcode }}",
+            "status": "={{ $json.pipeline_status }}"
+          },
+          "matchingColumns": [
+            "shortcode"
+          ],
+          "schema": [
+            {
+              "id": "shortcode",
+              "displayName": "shortcode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "taken_at_timestamp",
+              "displayName": "taken_at_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "scraped_at",
+              "displayName": "scraped_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "caption",
+              "displayName": "caption",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "like_count",
+              "displayName": "like_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "comment_count",
+              "displayName": "comment_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "play_count",
+              "displayName": "play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ig_play_count",
+              "displayName": "ig_play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "duration_seconds",
+              "displayName": "duration_seconds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "gd_file_id",
+              "displayName": "gd_file_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "link_to_gdrive",
+              "displayName": "link_to_gdrive",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Shortlisted",
+              "displayName": "Shortlisted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Original json file",
+              "displayName": "Original json file",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "DNA_Extractor",
+              "displayName": "DNA_Extractor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Adapter",
+              "displayName": "Adapter",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "final_prompt",
+              "displayName": "final_prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reason_to_skip",
+              "displayName": "reason_to_skip",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "final_prompt_seedance",
+              "displayName": "final_prompt_seedance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "output_kie_seedance",
+              "displayName": "output_kie_seedance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "output_gd_seedance",
+              "displayName": "output_gd_seedance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "seedance_generation_status",
+              "displayName": "seedance_generation_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "seedance_generation_note",
+              "displayName": "seedance_generation_note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "final_prompt_kling",
+              "displayName": "final_prompt_kling",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "output_kie_kling",
+              "displayName": "output_kie_kling",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "output_gd_kling",
+              "displayName": "output_gd_kling",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "kling_generation_status",
+              "displayName": "kling_generation_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "kling_generation_note",
+              "displayName": "kling_generation_note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        160,
+        1680
+      ],
+      "id": "6e50a627-05ad-481b-9634-f9691b80ae5f",
+      "name": "add score",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    product: {\n      name: \"Speechify\",\n      description: \"An app that turns books, PDFs, articles, emails, and documents into audio using AI voices.\",\n      audiences: [\"people with ADHD or focus challenges\", \"students\", \"professionals\", \"busy readers\"],\n      value_props: [\"save time\", \"listen instead of read\", \"consume more content\", \"learn while multitasking\"],\n      target_markets: [\"US\", \"CA\", \"GB\", \"AU\"]\n    },\n    scoring: {\n      allowed_languages: [\"en\"],\n      max_source_duration_sec: 60,\n      target_video_duration_sec: 15,\n      min_product_fit_score: 0.60,\n      min_ai_video_generation_score: 0.60,\n      reject_local_or_cultural_concepts: true\n    },\n    generation: {\n      aspect_ratio: \"9:16\",\n      seedance_model: \"bytedance/seedance-2\",\n      kling_model: \"kling-3.0/video\"\n    }\n  }\n}];"
+      },
+      "id": "pipeline-config-VzJI2cBUt1pV62nR",
+      "name": "Pipeline Config",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1616,
+        1664
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking Execute workflow": {
+      "main": [
+        [
+          {
+            "node": "Pipeline Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get generated rows": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Rows": {
+      "main": [
+        [],
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify visible text with Gemini": {
+      "main": [
+        [
+          {
+            "node": "Save text gate result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save text gate result": {
+      "main": [
+        [
+          {
+            "node": "DNA_Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Classify visible text with Gemini",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DNA_Extractor": {
+      "main": [
+        [
+          {
+            "node": "add score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "add score": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pipeline Config": {
+      "main": [
+        [
+          {
+            "node": "Get generated rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "b187bcf1-ecc2-428d-8f61-fef17dac6e2e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b4133111f3c5848c25758b32cbf6eac5c8844e43bb04ededb8c87ee88bcf165a"
+  },
+  "nodeGroups": [],
+  "id": "VzJI2cBUt1pV62nR",
+  "tags": []
+}

@@ -61,14 +61,12 @@
       "parameters": {
         "driveId": {
           "__rl": true,
-          "value": "0AEUHGOTIQYLPUk9PVA",
-          "mode": "list",
-          "cachedResultName": "Creative Automation",
-          "cachedResultUrl": "https://drive.google.com/drive/folders/0AEUHGOTIQYLPUk9PVA"
+          "value": "YOUR_GOOGLE_DRIVE_ID",
+          "mode": "id"
         },
         "folderId": {
           "__rl": true,
-          "value": "19AknNun7xieRBZmeb9Qe9NwXE6QtQvKr",
+          "value": "YOUR_OUTPUT_FOLDER_ID",
           "mode": "id"
         },
         "options": {}
@@ -83,7 +81,6 @@
       "name": "Upload",
       "credentials": {
         "googleDriveOAuth2Api": {
-          "id": "DtnrkDH0Rk70yBvO",
           "name": "Google Drive account"
         }
       }
@@ -93,10 +90,8 @@
         "operation": "appendOrUpdate",
         "documentId": {
           "__rl": true,
-          "value": "1ah3Lz5Opg7GaHMxjZ0h3a-vaZBJ5XEeBX66iONJ46ks",
-          "mode": "list",
-          "cachedResultName": "IG Reels scraper",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit?usp=drivesdk"
+          "value": "15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888",
+          "mode": "id"
         },
         "sheetName": {
           "__rl": true,
@@ -551,8 +546,7 @@
       "name": "Add id to table",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "KfwbD2ROouMFmFE6",
-          "name": "Kirill Speechify"
+          "name": "Google Sheets account"
         }
       }
     },
@@ -612,10 +606,8 @@
       "parameters": {
         "documentId": {
           "__rl": true,
-          "value": "1ah3Lz5Opg7GaHMxjZ0h3a-vaZBJ5XEeBX66iONJ46ks",
-          "mode": "list",
-          "cachedResultName": "IG Reels scraper",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit?usp=drivesdk"
+          "value": "15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888",
+          "mode": "id"
         },
         "sheetName": {
           "__rl": true,
@@ -636,8 +628,7 @@
       "name": "Get row(s) in sheet",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "KfwbD2ROouMFmFE6",
-          "name": "Kirill Speechify"
+          "name": "Google Sheets account"
         }
       }
     },

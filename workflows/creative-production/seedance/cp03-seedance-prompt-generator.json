@@ -1,0 +1,635 @@
+{
+  "name": "cp03 Seedance Prompt Generator",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        1408,
+        336
+      ],
+      "id": "598b03be-e23f-41ec-bca0-3bef7010fd87",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1839004881,
+          "mode": "list",
+          "cachedResultName": "for_generating",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit#gid=1839004881"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status",
+              "lookupValue": "adapted"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1872,
+        336
+      ],
+      "id": "659d643a-ba39-4d63-9768-560a73ba7436",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2384,
+        336
+      ],
+      "id": "25d6ff5d-1591-47fb-9432-45d25d681de8",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=You are a senior AI video prompt director for Seedance short-form performance ads.\n\nReturn ONLY valid JSON. No markdown. No comments.\n\nYou will receive:\n1. Original visual anchor from the analyzed video.\n2. Creative DNA extracted from the organic video.\n3. A product-adapted concept from the Adapter step.\n4. Output requirements for Seedance.\n\nProject configuration:\n{{ JSON.stringify($('Pipeline Config').first().json) }}\n\nInput:\n{{ JSON.stringify($json.prompt_generator_input) }}\n\nTask:\nGenerate one production-ready Seedance prompt for a realistic 15-second vertical TikTok-style ad.\n\nImportant:\n- Do NOT re-adapt the concept from scratch.\n- Preserve the adapted concept, hook, core mechanic, pacing, emotional arc, and source visual anchor.\n- Use adaptation.visual_anchor first. If missing, use original_anchor.\n- Keep the same speaker type, setting, and camera style as the source unless impossible.\n- If the source or adaptation contains a topic relevant to the configured product, include that topic explicitly in spoken dialogue.\n- Make the video realistic, simple, and feasible for AI generation in about 15 seconds.\n- Do NOT include spoken mentions of the configured product brand.\n- In spoken dialogue, use \"this app\", \"this tool\", or \"the audio reading app\" if a product reference is needed.\n- A branded outro and subtitles will be attached later, so do not generate a logo outro, captions, or any text overlay.\n- Use English dialogue only.\n- Keep dialogue short, natural, and specific.\n\nSeedance guidance:\n- Maximum prompt length: 5000 characters.\n- Include dialogue, visible action, camera, pacing, setting, character, mood, and edit notes.\n- Use clear timing beats for a 15-second video.\n- Write concrete visual instructions, not marketing strategy.\n- Avoid complex app UI, exact screens, tiny readable text, text messages, book/page close-ups, complicated choreography, many locations, or many recurring characters.\n- Do not ask Seedance to render readable words anywhere in the video. Use physical behavior and spoken dialogue instead.\n\nOutput schema:\n{\n  \"creative_brief\": {\n    \"id\": \"string|null\",\n    \"concept\": \"string\",\n    \"source_visual_anchor\": \"string\",\n    \"hook\": \"string\",\n    \"duration_sec\": 15,\n    \"aspect_ratio\": \"9:16\",\n    \"mechanic_preserved\": \"string\",\n    \"dialogue\": [\n      {\"speaker\": \"string\", \"line\": \"string\"}\n    ],\n    \"shot_plan\": [\n      {\"time\": \"00:00-00:03\", \"visual\": \"string\", \"audio\": \"string\"}\n    ],\n    \"do_not_include\": [\"string\"]\n  },\n  \"seedance\": {\n    \"prompt\": \"string\",\n    \"negative_prompt\": \"string\",\n    \"duration_sec\": 15,\n    \"aspect_ratio\": \"9:16\"\n  },\n  \"qa\": {\n    \"seedance_prompt_chars\": 0,\n    \"spoken_brand_avoided\": true,\n    \"source_visual_anchor_preserved\": true,\n    \"no_readable_text_or_ui\": true,\n    \"feasible_for_ai_video\": true,\n    \"notes\": [\"string\"]\n  }\n}\n\nHard rules:\n- No extra keys.\n- Do not output overlay_text.\n- seedance.prompt.length must be under 5000 characters.\n- qa.seedance_prompt_chars must match the actual prompt length approximately.\n- spoken_brand_avoided must be false if any dialogue says the configured product name.\n- source_visual_anchor_preserved must be false if the prompt changes the source speaker/setting/camera without explanation.\n- no_readable_text_or_ui must be false if the prompt mentions UI, interface, app screen, phone screen close-up, screenshot, buttons, menus, dashboard, text messages, overlays, captions, subtitles, title cards, labels, floating text, on-screen text, typography, readable book pages, or readable text.\n- Do not output Kling fields."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        2832,
+        352
+      ],
+      "id": "4f13fddd-b405-47ee-933f-419e3d9c78ab",
+      "name": "Generate Seedance Prompt",
+      "credentials": {
+        "openAiApi": {
+          "name": "OpenAI API account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $('Pipeline Config').first().json;\nfunction cleanJsonText(raw) {\n  let text = raw;\n\n  if (typeof raw === 'object' && raw !== null) {\n    if (raw.parts?.[0]?.text) text = raw.parts[0].text;\n    else if (raw.output?.[0]?.content?.[0]?.text) text = raw.output[0].content[0].text;\n    else text = JSON.stringify(raw);\n  }\n\n  return String(text || '')\n    .replace(/^```json\\s*/i, '')\n    .replace(/^```\\s*/i, '')\n    .replace(/```$/i, '')\n    .trim();\n}\n\nfunction safeParse(raw) {\n  if (raw == null || raw === '') return null;\n\n  try {\n    return JSON.parse(cleanJsonText(raw));\n  } catch (error) {\n    try {\n      return JSON.parse(cleanJsonText(raw).replace(/\\\\\"/g, '\"'));\n    } catch (repairError) {\n      return {\n        _parse_error: repairError.message,\n        _raw: cleanJsonText(raw).slice(0, 4000)\n      };\n    }\n  }\n}\n\nfunction compactAdapter(adapter) {\n  return {\n    source_fidelity: adapter?.source_fidelity ?? null,\n    visual_anchor: adapter?.visual_anchor ?? null,\n    adapted_concept: adapter?.adapted_concept ?? null,\n    new_hook: adapter?.new_hook ?? null,\n    new_script_15s: adapter?.new_script_15s ?? adapter?.new_script ?? null,\n    shot_plan_15s: adapter?.shot_plan_15s ?? adapter?.scene_structure ?? [],\n    production_notes: adapter?.production_notes ?? [],\n    do_not_include: adapter?.do_not_include ?? []\n  };\n}\n\nfunction compactOriginal(original) {\n  const host = Array.isArray(original?.people) ? original.people[0] : null;\n  return {\n    format: original?.format ?? null,\n    structure: original?.structure ?? null,\n    core_idea: original?.core_idea ?? null,\n    hook_visual: original?.hook?.visual ?? null,\n    hook_verbal: original?.hook?.verbal ?? null,\n    style: original?.style ?? null,\n    host: host ? {\n      appearance: host.appearance ?? null,\n      outfit: host.outfit ?? null,\n      key_action: host.key_action ?? null\n    } : null,\n    locations: Array.isArray(original?.segments) ? [...new Set(original.segments.map(s => s.location).filter(Boolean))].slice(0, 3) : []\n  };\n}\n\nfunction compactDna(dna) {\n  return {\n    video_duration_sec: dna?.video_duration_sec ?? null,\n    main_video_language: dna?.main_video_language ?? null,\n    primary_format: dna?.primary_format ?? null,\n    core_mechanic: dna?.core_mechanic ?? null,\n    hook_type: dna?.hook_type ?? null,\n    hook_text: dna?.hook_text ?? null,\n    primary_angle: dna?.primary_angle ?? null,\n    dominant_emotion: dna?.dominant_emotion ?? null,\n    emotional_arc: dna?.emotional_arc ?? [],\n    viral_mechanics: dna?.viral_mechanics ?? [],\n    psychological_triggers: dna?.psychological_triggers ?? [],\n    pattern: dna?.pattern ?? null,\n    script_summary: dna?.script_summary ?? null,\n    ai_video_generation_score: dna?.ai_video_generation_score ?? null,\n    product_fit_score: dna?.product_fit?.score ?? null\n  };\n}\n\nreturn items.map(item => {\n  const original = safeParse(item.json['Original json file']);\n  const dna = safeParse(item.json.DNA_Extractor);\n  const adapter = safeParse(item.json.Adapter);\n\n  item.json.prompt_generator_input = {\n    row: {\n      shortcode: item.json.shortcode ?? item.json.id ?? null,\n      postPage: item.json.url ?? item.json.postPage ?? null,\n      score: item.json.score ?? null\n    },\n    original_anchor: compactOriginal(original),\n    creative_dna: compactDna(dna),\n    adaptation: compactAdapter(adapter),\n    source_fidelity_policy: {\n      preserve_visual_anchor: 'Use adaptation.visual_anchor first. If missing, use original_anchor. Do not invent a different speaker, location, or format.',\n      preserve_topic_anchor: 'If a topic relevant to the configured product exists in the source or adaptation, it must appear in the generated dialogue.',\n      no_text_rendering: 'Do not ask the video model to render readable text, captions, title cards, labels, book pages, screenshots, app screens, or UI. Subtitles and branded outro are added after generation.'\n    },\n    parse_warnings: {\n      original: original?._parse_error ?? null,\n      dna: dna?._parse_error ?? null,\n      adapter: adapter?._parse_error ?? null\n    },\n    output_requirements: {\n      duration_sec: config.scoring.target_video_duration_sec,\n      aspect_ratio: config.generation.aspect_ratio,\n      target_model: 'seedance',\n      seedance_max_chars: 5000,\n      kling_max_chars: 2500,\n      spoken_brand_policy: `Do not say ${config.product.name} in dialogue. Use a generic product reference instead.`,\n      no_interface_policy: 'Do not show app UI, interfaces, screens, phone/laptop/tablet screen close-ups, waveform animations, screenshots, buttons, menus, dashboards, text messages, or readable digital surfaces.',\n      no_text_policy: 'Do not include overlays, captions, subtitles, lower-thirds, title cards, labels, floating text, on-screen text, typography, readable books/pages, or any text rendered in the video.',\n      branded_outro_policy: 'A separate branded outro and subtitles will be added later. Do not include logo animation, captions, overlays, or a spoken brand tagline.',\n      visual_style: 'realistic vertical TikTok ad, casual UGC realism, source-matched setting and camera, fast cuts, natural phone-video imperfections'\n    }\n  };\n\n  return item;\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2624,
+        352
+      ],
+      "id": "79fa9207-9dab-42d9-bc3f-5623eb00013d",
+      "name": "Prepare Prompt Generator Input"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1839004881,
+          "mode": "list",
+          "cachedResultName": "for_generating",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit#gid=1839004881"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "final_prompt_seedance": "={{ $json.final_prompt_seedance }}",
+            "shortcode": "={{ $('Loop Over Items').item.json.shortcode }}",
+            "seedance_generation_status": "={{ $json.seedance_prompt_status }}",
+            "seedance_generation_note": "={{ $json.seedance_prompt_validation_note }}"
+          },
+          "matchingColumns": [
+            "shortcode"
+          ],
+          "schema": [
+            {
+              "id": "shortcode",
+              "displayName": "shortcode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "taken_at_timestamp",
+              "displayName": "taken_at_timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "scraped_at",
+              "displayName": "scraped_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "caption",
+              "displayName": "caption",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "like_count",
+              "displayName": "like_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "comment_count",
+              "displayName": "comment_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "play_count",
+              "displayName": "play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ig_play_count",
+              "displayName": "ig_play_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "duration_seconds",
+              "displayName": "duration_seconds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "gd_file_id",
+              "displayName": "gd_file_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "link_to_gdrive",
+              "displayName": "link_to_gdrive",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Shortlisted",
+              "displayName": "Shortlisted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Original json file",
+              "displayName": "Original json file",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "DNA_Extractor",
+              "displayName": "DNA_Extractor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Adapter",
+              "displayName": "Adapter",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "final_prompt",
+              "displayName": "final_prompt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "reason_to_skip",
+              "displayName": "reason_to_skip",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "final_prompt_seedance",
+              "displayName": "final_prompt_seedance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "output_kie_seedance",
+              "displayName": "output_kie_seedance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "output_gd_seedance",
+              "displayName": "output_gd_seedance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "seedance_generation_status",
+              "displayName": "seedance_generation_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "seedance_generation_note",
+              "displayName": "seedance_generation_note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "final_prompt_kling",
+              "displayName": "final_prompt_kling",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "output_kie_kling",
+              "displayName": "output_kie_kling",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "output_gd_kling",
+              "displayName": "output_gd_kling",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "kling_generation_status",
+              "displayName": "kling_generation_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "kling_generation_note",
+              "displayName": "kling_generation_note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3344,
+        352
+      ],
+      "id": "3628c61d-6b97-48ea-bf9c-87108c1a9467",
+      "name": "Save Seedance Prompt",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const productName = $('Pipeline Config').first().json.product.name;\nconst escapedProductName = String(productName).replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\nconst productNamePattern = new RegExp(escapedProductName, 'i');\nfunction cleanJsonText(raw) {\n  return String(raw || '')\n    .replace(/^```json\\s*/i, '')\n    .replace(/^```\\s*/i, '')\n    .replace(/```$/i, '')\n    .trim();\n}\n\nconst forbiddenTextPattern = /\\b(ui|interface|app screen|phone screen|screen close|close-up on phone|close up on phone|laptop screen|tablet screen|waveform|screenshot|button|buttons|menu|menus|dashboard|text message|text messages|readable screen|digital surface|overlay|overlays|caption|captions|subtitle|subtitles|lower-third|lower third|title card|label|labels|floating text|on-screen text|onscreen text|kinetic typography|typography|text rendered|readable text|readable page|book page close-up|close-up of a book page)\\b/i;\n\nreturn items.map(item => {\n  const raw = item.json.output?.[0]?.content?.[0]?.text\n    || item.json.text\n    || item.json.message?.content\n    || JSON.stringify(item.json);\n\n  try {\n    const parsed = JSON.parse(cleanJsonText(raw));\n    const seedancePrompt = parsed?.seedance?.prompt ?? '';\n    const seedanceLen = seedancePrompt.length;\n    const dialogue = JSON.stringify(parsed?.creative_brief?.dialogue ?? []);\n    const hasKling = parsed?.kling !== undefined;\n    const hasOverlayText = parsed?.creative_brief?.overlay_text !== undefined;\n    const hasForbiddenText = forbiddenTextPattern.test(seedancePrompt);\n    const valid = seedanceLen > 0\n      && seedanceLen <= 5000\n      && !productNamePattern.test(dialogue)\n      && !hasKling\n      && !hasOverlayText\n      && !hasForbiddenText;\n\n    item.json.final_prompt_seedance = JSON.stringify(parsed);\n    item.json.seedance_prompt_status = valid ? 'seedance_prompt_generated' : 'seedance_prompt_needs_review';\n    item.json.seedance_prompt_validation_note = `seedance=${seedanceLen}, has_kling=${hasKling}, has_overlay_text=${hasOverlayText}, has_forbidden_text_or_ui=${hasForbiddenText}`;\n  } catch (error) {\n    item.json.final_prompt_seedance = raw;\n    item.json.seedance_prompt_status = 'seedance_prompt_parse_error';\n    item.json.seedance_prompt_validation_note = error.message;\n  }\n\n  return item;\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3168,
+        352
+      ],
+      "id": "158cf73e-b5b9-41a4-977f-6fcc37dadbcf",
+      "name": "Validate Seedance Prompt"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "7215a785-ce94-4797-bd18-6cb651741669",
+              "leftValue": "={{ $json.final_prompt_seedance }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        2080,
+        336
+      ],
+      "id": "338ef157-d01a-41f1-a23c-35c0f26107bd",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    product: {\n      name: \"Speechify\",\n      description: \"An app that turns books, PDFs, articles, emails, and documents into audio using AI voices.\",\n      audiences: [\"people with ADHD or focus challenges\", \"students\", \"professionals\", \"busy readers\"],\n      value_props: [\"save time\", \"listen instead of read\", \"consume more content\", \"learn while multitasking\"],\n      target_markets: [\"US\", \"CA\", \"GB\", \"AU\"]\n    },\n    scoring: {\n      allowed_languages: [\"en\"],\n      max_source_duration_sec: 60,\n      target_video_duration_sec: 15,\n      min_product_fit_score: 0.60,\n      min_ai_video_generation_score: 0.60,\n      reject_local_or_cultural_concepts: true\n    },\n    generation: {\n      aspect_ratio: \"9:16\",\n      seedance_model: \"bytedance/seedance-2\",\n      kling_model: \"kling-3.0/video\"\n    }\n  }\n}];"
+      },
+      "id": "pipeline-config-F1QDPQDCpzfg9lgV",
+      "name": "Pipeline Config",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1648,
+        336
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Pipeline Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Prepare Prompt Generator Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Prompt Generator Input": {
+      "main": [
+        [
+          {
+            "node": "Generate Seedance Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Seedance Prompt": {
+      "main": [
+        [
+          {
+            "node": "Validate Seedance Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Seedance Prompt": {
+      "main": [
+        [
+          {
+            "node": "Save Seedance Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Seedance Prompt": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pipeline Config": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "2d6fa545-5796-4a6c-ba51-d1c0ef260033",
+  "meta": {
+    "instanceId": "b4133111f3c5848c25758b32cbf6eac5c8844e43bb04ededb8c87ee88bcf165a"
+  },
+  "nodeGroups": [],
+  "id": "F1QDPQDCpzfg9lgV",
+  "tags": []
+}
