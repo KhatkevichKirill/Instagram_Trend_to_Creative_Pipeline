@@ -611,10 +611,8 @@
       "parameters": {
         "documentId": {
           "__rl": true,
-          "value": "1ah3Lz5Opg7GaHMxjZ0h3a-vaZBJ5XEeBX66iONJ46ks",
-          "mode": "list",
-          "cachedResultName": "IG Reels scraper",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit?usp=drivesdk"
+          "value": "15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888",
+          "mode": "id"
         },
         "sheetName": {
           "__rl": true,
@@ -635,8 +633,7 @@
       "name": "Get row(s) in sheet",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "KfwbD2ROouMFmFE6",
-          "name": "Kirill Speechify"
+          "name": "Google Sheets account"
         }
       }
     },
@@ -645,10 +642,8 @@
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "1ah3Lz5Opg7GaHMxjZ0h3a-vaZBJ5XEeBX66iONJ46ks",
-          "mode": "list",
-          "cachedResultName": "IG Reels scraper",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit?usp=drivesdk"
+          "value": "15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888",
+          "mode": "id"
         },
         "sheetName": {
           "__rl": true,
@@ -822,8 +817,7 @@
       "name": "Append row in sheet",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "KfwbD2ROouMFmFE6",
-          "name": "Kirill Speechify"
+          "name": "Google Sheets account"
         }
       }
     },
@@ -832,10 +826,8 @@
         "operation": "update",
         "documentId": {
           "__rl": true,
-          "value": "1ah3Lz5Opg7GaHMxjZ0h3a-vaZBJ5XEeBX66iONJ46ks",
-          "mode": "list",
-          "cachedResultName": "IG Reels scraper",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit?usp=drivesdk"
+          "value": "15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888",
+          "mode": "id"
         },
         "sheetName": {
           "__rl": true,
@@ -1291,8 +1283,7 @@
       "name": "Update status",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "KfwbD2ROouMFmFE6",
-          "name": "Kirill Speechify"
+          "name": "Google Sheets account"
         }
       }
     }

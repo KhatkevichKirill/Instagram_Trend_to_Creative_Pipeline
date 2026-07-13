@@ -1,14 +1,16 @@
-# Instagram Trend Discovery Pipeline
+# Instagram Trend-to-Creative Pipeline
 
-This repository contains a small n8n + Google Sheets pipeline for discovering Instagram Reels that are starting to trend, tracking their metric growth, and moving the strongest candidates into a production queue for creative generation.
+This repository contains an end-to-end n8n + Google Sheets pipeline for discovering Instagram Reels that are starting to trend, tracking their growth, selecting the strongest candidates, adapting their creative structure to a product, and generating new videos with Seedance or Kling through Kie.ai.
 
-The system is built around one Google Spreadsheet, two n8n Data Tables, four main n8n workflows, and one helper workflow for downloading Instagram videos to Google Drive.
+The repository is intentionally split into two modules. Trend discovery can run on its own, and creative production can accept rows from any compatible source through the `for_generating` sheet contract.
 
 ## What It Does
 
-The pipeline monitors selected Instagram hashtags, collects top and recent Reels, deduplicates already-known posts, refreshes performance metrics over time, and surfaces the best-performing videos every day.
+The discovery module monitors selected Instagram hashtags, collects top and recent Reels, deduplicates already-known posts, refreshes performance metrics over time, and surfaces the best-performing videos every day.
 
-The main use case is creative research: instead of manually checking Instagram for emerging trends, the pipeline keeps a growing database of candidate Reels and highlights the ones that are gaining traction through views, likes, comments, and engagement velocity.
+The creative-production module analyzes shortlisted videos with Gemini, applies configurable market and product-fit gates, adapts the reusable concept to a product, generates model-specific prompts, and creates videos through either Seedance or Kling.
+
+Both modules communicate through `for_generating`. You can use the full pipeline or populate that sheet yourself and start directly from creative production.
 
 ## Spreadsheet Structure
 
@@ -75,6 +77,13 @@ flowchart TD
   B --> H["IG video downloader"]
   C --> H
   H --> D
+  G --> I["cp01 Gemini analysis + product-fit gate"]
+  I -->|accepted| J["cp02 product adapter"]
+  I -->|rejected| K["skipped"]
+  J --> L["cp03 Seedance prompt"]
+  J --> M["cp03 Kling prompt"]
+  L --> N["cp04 Seedance via Kie.ai"]
+  M --> O["cp04 Kling via Kie.ai"]
 ```
 
 ## Workflows
@@ -86,6 +95,10 @@ Detailed workflow documentation:
 - [wf03: IG Top Hashtags Scraping - Update Metrics](wf03-ig-tophashtags-scraping-update-metrics.md)
 - [wf04: Daily Top Reels](wf04-daily-top-reels.md)
 - [IG Video Scrapper Download](ig-video-scrapper-download.md)
+- [Creative production overview](docs/creative-production.md)
+- [`for_generating` sheet contract](docs/for-generating-schema.md)
+- [Seedance setup](docs/seedance.md)
+- [Kling setup](docs/kling.md)
 
 ### `wf01 IG_tophashtags_scraping.json`
 
@@ -153,18 +166,28 @@ It is called by the scraping workflows rather than being the main discovery flow
 3. Enable `wf02` on a schedule to append newly discovered recent posts.
 4. Enable `wf03` to refresh metrics and track growth while avoiding unnecessary Apify runs.
 5. Enable `wf04` to move the strongest daily candidates into `for_generating`.
-6. Review `for_generating` daily and use those Reels as inputs for creative production.
+6. Run `cp01` to analyze queued videos and reject candidates that fail the configured gates.
+7. Run `cp02` to adapt accepted creative DNA to the configured product.
+8. Choose Seedance, Kling, or both: run the matching `cp03` prompt generator and `cp04` video generator.
+
+All six creative-production workflows use manual triggers on purpose. Replace the trigger after import if you prefer a schedule, webhook, Execute Sub-workflow node, or another orchestration strategy.
 
 ## Setup Notes
 
 - Import all JSON workflows into n8n.
 - Reconnect Google Sheets, Google Drive, and Apify credentials after import.
-- Update spreadsheet IDs, sheet IDs, Google Drive folder IDs, and Data Table IDs for your own workspace.
+- The included discovery and creative-production workflows point to the public template spreadsheet. Replace its ID in every Google Sheets node if you make a private copy.
+- Replace `YOUR_GOOGLE_DRIVE_ID` and `YOUR_OUTPUT_FOLDER_ID` in Google Drive upload nodes.
+- Update n8n Data Table IDs for your own workspace.
 - Create the required n8n Data Tables before running `wf03` and `wf04`.
-- The workflow files include instance-specific references from the original n8n project, so imported nodes should be checked once in the n8n UI.
+- Imported nodes should be checked once in the n8n UI because Data Table references and credential selections are instance-specific.
+- Creative-production workflows point to the public [template spreadsheet](https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit#gid=1839004881). Make your own copy before using it with private data.
+- Edit the `Pipeline Config` Code node in every creative-production workflow to change the product context, target markets, scoring thresholds, target duration, or generation model.
+- Reconnect the generic Google Sheets, Google Drive, Gemini, OpenAI, and Kie.ai credential placeholders after importing the creative-production workflows.
+- In both video-generator workflows, replace `YOUR_GOOGLE_DRIVE_ID` and `YOUR_OUTPUT_FOLDER_ID` in the `Upload file` node.
 
 ## Repository Description
 
 Short GitHub description:
 
-> n8n workflows for discovering trending Instagram Reels, tracking metric growth with Apify, and queueing daily top videos for creative generation.
+> End-to-end n8n pipeline for discovering trending Instagram Reels, scoring and adapting creative concepts, and generating videos with Gemini, Seedance, Kling, and Kie.ai.
