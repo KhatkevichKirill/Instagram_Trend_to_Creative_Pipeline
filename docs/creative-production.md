@@ -6,10 +6,10 @@ The creative-production module starts from rows in `for_generating`. It can foll
 
 | Step | Workflow | Purpose |
 | --- | --- | --- |
-| `cp01` | [`cp01-gemini-dna-extractor.json`](../workflows/creative-production/cp01-gemini-dna-extractor.json) | Downloads the source video from Google Drive, asks Gemini to extract reusable creative DNA, scores product/market fit, and records an accept, skip, or error decision. |
-| `cp02` | [`cp02-product-adapter.json`](../workflows/creative-production/cp02-product-adapter.json) | Combines the source analysis with the configured product context and produces a source-faithful 15-second adapted concept. |
-| `cp03` | Seedance or Kling prompt generator | Converts the adaptation into a validated, model-specific prompt. You may run either branch or both. |
-| `cp04` | Seedance or Kling Kie.ai generator | Creates the video, polls Kie.ai, saves the provider URL, uploads the result to Google Drive, and saves the Drive link. |
+| `cp01` | [Gemini Creative DNA Extractor](../workflows/creative-production/cp01-gemini-dna-extractor.md) | Downloads the source video from Google Drive, asks Gemini to extract reusable creative DNA, scores product/market fit, and records an accept, skip, or error decision. |
+| `cp02` | [Product Adapter](../workflows/creative-production/cp02-product-adapter.md) | Combines the source analysis with the configured product context and produces a source-faithful 15-second adapted concept. |
+| `cp03` | [Seedance prompt generator](../workflows/creative-production/seedance/cp03-seedance-prompt-generator.md) or [Kling prompt generator](../workflows/creative-production/kling/cp03-kling-prompt-generator.md) | Converts the adaptation into a validated, model-specific prompt. You may run either branch or both. |
+| `cp04` | [Seedance generator](../workflows/creative-production/seedance/cp04-seedance-video-generator-kie.md) or [Kling generator](../workflows/creative-production/kling/cp04-kling-video-generator-kie.md) | Creates the video, polls Kie.ai, saves the provider URL, uploads the result to Google Drive, and saves the Drive link. |
 
 ## Public Template
 

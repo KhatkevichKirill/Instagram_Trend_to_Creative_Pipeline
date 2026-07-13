@@ -2,8 +2,8 @@
 
 The Kling branch consists of two workflows:
 
-1. [`cp03-kling-prompt-generator.json`](../workflows/creative-production/kling/cp03-kling-prompt-generator.json)
-2. [`cp04-kling-video-generator-kie.json`](../workflows/creative-production/kling/cp04-kling-video-generator-kie.json)
+1. [Kling prompt generator](../workflows/creative-production/kling/cp03-kling-prompt-generator.md)
+2. [Kling video generator via Kie.ai](../workflows/creative-production/kling/cp04-kling-video-generator-kie.md)
 
 ## Setup
 
