@@ -2,8 +2,8 @@
 
 The Seedance branch consists of two workflows:
 
-1. [`cp03-seedance-prompt-generator.json`](../workflows/creative-production/seedance/cp03-seedance-prompt-generator.json)
-2. [`cp04-seedance-video-generator-kie.json`](../workflows/creative-production/seedance/cp04-seedance-video-generator-kie.json)
+1. [Seedance prompt generator](../workflows/creative-production/seedance/cp03-seedance-prompt-generator.md)
+2. [Seedance video generator via Kie.ai](../workflows/creative-production/seedance/cp04-seedance-video-generator-kie.md)
 
 ## Setup
 

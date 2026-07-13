@@ -100,6 +100,8 @@ Detailed workflow documentation:
 - [Seedance setup](docs/seedance.md)
 - [Kling setup](docs/kling.md)
 
+Each creative-production JSON file also has a detailed Markdown guide beside it, matching the documentation pattern used by the discovery workflows.
+
 ### `wf01 IG_tophashtags_scraping.json`
 
 Initial backfill workflow for building the first dataset from hashtag top posts.
