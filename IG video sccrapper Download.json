@@ -6,15 +6,15 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        400,
-        48
+        -16,
+        208
       ],
-      "id": "783e42db-28b1-4faa-ab09-29c96c6271bb",
+      "id": "f319747a-ded8-47c0-a036-bc29c71b715b",
       "name": "When clicking ‘Execute workflow’"
     },
     {
       "parameters": {
-        "url": "={{ $json.video_url }}",
+        "url": "={{ $json.download_url }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -24,19 +24,20 @@
             },
             {
               "name": "Referer",
-              "value": "https://www.tiktok.com/"
+              "value": "https://www.instagram.com/"
             },
             {
               "name": "Accept",
               "value": "*/*"
             },
             {
-              "name": "Range",
-              "value": "bytes=0-"
+              "name": "Host",
+              "value": "={{ $json.cdn_host }}"
             }
           ]
         },
         "options": {
+          "allowUnauthorizedCerts": true,
           "redirect": {
             "redirect": {}
           },
@@ -51,14 +52,18 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        1472,
-        16
+        1296,
+        176
       ],
-      "id": "a1d81d77-8f9b-4f97-b123-1b72688625ad",
-      "name": "HTTP Request"
+      "id": "4dbfb3df-20bb-4a05-b761-d819a8efa31d",
+      "name": "HTTP Request",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
     },
     {
       "parameters": {
+        "authentication": "serviceAccount",
         "driveId": {
           "__rl": true,
           "value": "YOUR_GOOGLE_DRIVE_ID",
@@ -66,7 +71,7 @@
         },
         "folderId": {
           "__rl": true,
-          "value": "YOUR_OUTPUT_FOLDER_ID",
+          "value": "YOUR_GOOGLE_DRIVE_FOLDER_ID",
           "mode": "id"
         },
         "options": {}
@@ -74,31 +79,25 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        1648,
-        16
+        1440,
+        176
       ],
-      "id": "b6f3dc6b-32f0-4a50-9d39-e453212c832a",
-      "name": "Upload",
-      "credentials": {
-        "googleDriveOAuth2Api": {
-          "name": "Google Drive account"
-        }
-      }
+      "id": "d0a8627b-ec0f-4328-b10b-83987b972916",
+      "name": "Upload"
     },
     {
       "parameters": {
+        "authentication": "serviceAccount",
         "operation": "appendOrUpdate",
         "documentId": {
           "__rl": true,
-          "value": "15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888",
+          "value": "YOUR_GOOGLE_SHEET_ID",
           "mode": "id"
         },
         "sheetName": {
           "__rl": true,
-          "value": 1114552552,
-          "mode": "list",
-          "cachedResultName": "general",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit#gid=1114552552"
+          "value": "YOUR_SHEET_NAME",
+          "mode": "id"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -539,16 +538,11 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        1856,
-        16
+        1600,
+        176
       ],
-      "id": "584cc5de-74b1-422c-9717-b2ed7bb4cb24",
-      "name": "Add id to table",
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "name": "Google Sheets account"
-        }
-      }
+      "id": "f6096fbd-89d1-4370-80c4-46ee75264ed2",
+      "name": "Add id to table"
     },
     {
       "parameters": {
@@ -596,41 +590,35 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.3,
       "position": [
-        784,
-        48
+        368,
+        208
       ],
-      "id": "f67ec8f4-64e1-4640-b325-c5d8c5c2b93b",
+      "id": "41090974-5bda-4a39-a662-b74513376cde",
       "name": "Filter"
     },
     {
       "parameters": {
+        "authentication": "serviceAccount",
         "documentId": {
           "__rl": true,
-          "value": "15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888",
+          "value": "YOUR_GOOGLE_SHEET_ID",
           "mode": "id"
         },
         "sheetName": {
           "__rl": true,
-          "value": 1114552552,
-          "mode": "list",
-          "cachedResultName": "general",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit#gid=1114552552"
+          "value": "YOUR_SHEET_NAME",
+          "mode": "id"
         },
         "options": {}
       },
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        576,
-        48
+        160,
+        208
       ],
-      "id": "0adef99e-e2a9-4c16-9310-fba06718641d",
-      "name": "Get row(s) in sheet",
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "name": "Google Sheets account"
-        }
-      }
+      "id": "6806896d-3e44-4717-9f07-2cfd2e494e8a",
+      "name": "Get row(s) in sheet"
     },
     {
       "parameters": {
@@ -639,10 +627,10 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        1040,
+        608,
         0
       ],
-      "id": "f1dd6111-b13d-4e49-9378-9f43c4001654",
+      "id": "2eefbc55-cf48-4141-bcb1-c73f8d096404",
       "name": "Loop Over Items"
     },
     {
@@ -652,10 +640,10 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        416,
-        -160
+        0,
+        0
       ],
-      "id": "580db573-c453-4f5f-912f-c33fea081469",
+      "id": "5be5bfda-519d-4aca-bd3a-9f0514044cf0",
       "name": "When Executed by Another Workflow"
     },
     {
@@ -686,11 +674,83 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        1248,
-        32
+        784,
+        0
       ],
-      "id": "88341383-c000-41fb-ad24-cb12e21a246d",
+      "id": "b8265d67-fc43-4f51-b7fd-6bb83f6fd8dd",
       "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "const FNA_RE = /^instagram\\.[^.]+\\.fna\\.fbcdn\\.net$/i;\nconst HOST_RE = /^https?:\\/\\/([^\\/?#:]+)/i;\n\nfunction hostnameOf(raw) {\n  const match = String(raw).match(HOST_RE);\n  return match ? match[1] : '';\n}\n\nfunction prepare(json) {\n  const raw = String(json.video_url || '').trim();\n  const originalHost = hostnameOf(raw);\n  if (!raw || !originalHost) return json;\n\n  const host = FNA_RE.test(originalHost) ? 'scontent.cdninstagram.com' : originalHost;\n  const cdnUrl = raw.replace(originalHost, host);\n  return Object.assign({}, json, { cdn_host: host, cdn_url: cdnUrl });\n}\n\nreturn $input.all().map(function (item) {\n  return { json: prepare(Object.assign({}, item.json)) };\n});",
+        "mode": "runOnceForAllItems"
+      },
+      "id": "737532c4-c668-4f07-810e-69f6d7052a06",
+      "name": "Prepare CDN URL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        944,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/dns-json"
+            }
+          ]
+        },
+        "method": "GET",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 10000
+        },
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "={{ $json.cdn_host }}"
+            },
+            {
+              "name": "type",
+              "value": "A"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "sendQuery": true,
+        "url": "https://1.1.1.1/dns-query"
+      },
+      "id": "0a2f68bf-2ecd-4e23-bc06-219d1b25afe3",
+      "name": "Resolve IPv4",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1056,
+        176
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const prevItems = $('Prepare CDN URL').all();\nconst prev = ((prevItems[$itemIndex] || prevItems[0] || {}).json) || {};\n\nlet dns = $json;\nif (typeof dns.data === 'string') {\n  try { dns = JSON.parse(dns.data); } catch (e) {}\n}\n\nconst answers = [].concat(dns.Answer || []).concat(dns.answer || []).concat(Array.isArray(dns.data) ? dns.data : []);\nconst a = answers.find(function (row) {\n  const value = String((row && (row.data || row.ip || row.IPv4)) || '');\n  const isA = row && (Number(row.type) === 1 || String(row.type).toUpperCase() === 'A');\n  return isA && /^\\d{1,3}(?:\\.\\d{1,3}){3}$/.test(value);\n});\n\nconst cdnUrl = String(prev.cdn_url || '');\nif (!a || !cdnUrl) {\n  throw new Error('No IPv4 address for ' + (prev.cdn_host || prev.video_url || 'unknown host'));\n}\n\nconst pathAndQuery = cdnUrl.replace(/^https?:\\/\\/[^\\/?#]+/i, '');\nreturn [{\n  json: Object.assign({}, prev, {\n    ipv4: a.data,\n    download_url: 'https://' + a.data + pathAndQuery,\n  }),\n}];",
+        "mode": "runOnceForAllItems"
+      },
+      "id": "14a5bf5d-283d-40a9-9985-b9a223deea5a",
+      "name": "Build IPv4 download URL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1184,
+        176
+      ]
     }
   ],
   "pinData": {},
@@ -788,7 +848,7 @@
       "main": [
         [
           {
-            "node": "HTTP Request",
+            "node": "Prepare CDN URL",
             "type": "main",
             "index": 0
           }
@@ -801,20 +861,48 @@
           }
         ]
       ]
+    },
+    "Prepare CDN URL": {
+      "main": [
+        [
+          {
+            "node": "Resolve IPv4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resolve IPv4": {
+      "main": [
+        [
+          {
+            "node": "Build IPv4 download URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build IPv4 download URL": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": true,
+  "active": false,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false
+    "availableInMCP": true,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
   },
-  "versionId": "52aee33a-d1b7-4fe5-b712-a394c552b63c",
-  "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "b4133111f3c5848c25758b32cbf6eac5c8844e43bb04ededb8c87ee88bcf165a"
-  },
-  "nodeGroups": [],
-  "id": "VV5hXrQQDjHvs8Yi",
-  "tags": []
+  "nodeGroups": []
 }

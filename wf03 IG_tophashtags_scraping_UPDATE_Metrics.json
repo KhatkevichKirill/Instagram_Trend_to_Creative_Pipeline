@@ -3,18 +3,17 @@
   "nodes": [
     {
       "parameters": {
+        "authentication": "serviceAccount",
         "operation": "update",
         "documentId": {
           "__rl": true,
-          "value": "15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888",
+          "value": "YOUR_GOOGLE_SHEET_ID",
           "mode": "id"
         },
         "sheetName": {
           "__rl": true,
-          "value": 1114552552,
-          "mode": "list",
-          "cachedResultName": "general",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit#gid=1114552552"
+          "value": "YOUR_SHEET_NAME",
+          "mode": "id"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -459,16 +458,11 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        1648,
-        1248
+        1360,
+        544
       ],
-      "id": "5a3aa30f-e78b-41a0-8d31-d5c95c288be0",
-      "name": "Update row in sheet",
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "name": "Google Sheets account"
-        }
-      }
+      "id": "495711fb-d499-4063-ae45-41f952e3568e",
+      "name": "Update row in sheet"
     },
     {
       "parameters": {
@@ -478,10 +472,10 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        752,
-        1232
+        464,
+        528
       ],
-      "id": "0e2a3bc0-10d9-460f-ad87-6206d3356772",
+      "id": "5bc8544c-3054-4fd9-bee9-be71e13266f5",
       "name": "Loop Over Items"
     },
     {
@@ -491,73 +485,42 @@
         "actorId": {
           "__rl": true,
           "value": "nH2AHrwxeTRJoN5hX",
-          "mode": "list",
-          "cachedResultName": "Instagram Post Scraper (apify/instagram-post-scraper)",
-          "cachedResultUrl": "https://console.apify.com/actors/nH2AHrwxeTRJoN5hX/input"
+          "mode": "list"
         },
         "customBody": "={{\n  JSON.stringify({\n    dataDetailLevel: \"detailedData\",\n    resultsLimit: 50,\n    skipPinnedPosts: false,\n    username: $json.urls\n  })\n}}"
       },
       "type": "@apify/n8n-nodes-apify.apify",
       "typeVersion": 1,
       "position": [
-        1200,
-        1248
+        912,
+        544
       ],
-      "id": "1a1f7def-581e-413c-90b3-6d4066e66a85",
-      "name": "Run an Actor and get dataset",
-      "credentials": {
-        "apifyApi": {
-          "name": "Apify account"
-        }
-      }
+      "id": "ed412724-03bd-48bc-9eca-2c66745ed488",
+      "name": "Run an Actor and get dataset"
     },
     {
       "parameters": {
+        "authentication": "serviceAccount",
         "documentId": {
           "__rl": true,
-          "value": "15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888",
+          "value": "YOUR_GOOGLE_SHEET_ID",
           "mode": "id"
         },
         "sheetName": {
           "__rl": true,
-          "value": 1114552552,
-          "mode": "list",
-          "cachedResultName": "general",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15U44PZbhgFEWRrzOYqnybEk2km_1f6bmPaI0wi_-888/edit#gid=1114552552"
+          "value": "YOUR_SHEET_NAME",
+          "mode": "id"
         },
-        "options": {
-          "dataLocationOnSheet": {
-            "values": {
-              "rangeDefinition": "specifyRangeA1",
-              "range": "C1:C1000"
-            }
-          }
-        }
+        "options": {}
       },
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        64,
-        1152
+        -224,
+        448
       ],
-      "id": "007d5775-418a-4c20-b4f3-9f60b2ed03f4",
-      "name": "Get row(s) in sheet",
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "name": "Google Sheets account"
-        }
-      }
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [
-        -176,
-        1232
-      ],
-      "id": "5eb9c5c8-50ec-48b7-b019-9512fbe5364a",
-      "name": "When clicking ‘Execute workflow’"
+      "id": "a225e6d6-18e4-477a-b087-2d67423ea504",
+      "name": "Get row(s) in sheet"
     },
     {
       "parameters": {
@@ -566,10 +529,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        976,
-        1248
+        688,
+        544
       ],
-      "id": "454c1b85-0109-4396-902f-70e09b145be1",
+      "id": "c286d62b-16dc-4188-b5c9-055114c24ea5",
       "name": "Code: Collect URLs"
     },
     {
@@ -577,20 +540,18 @@
         "operation": "get",
         "dataTableId": {
           "__rl": true,
-          "value": "IfyC05aM0eYqTAE7",
-          "mode": "list",
-          "cachedResultName": "IG Metrics Tracking State",
-          "cachedResultUrl": "/projects/Z4xKAmlikaZIHgF6/datatables/IfyC05aM0eYqTAE7"
+          "value": "YOUR_N8N_DATA_TABLE_ID",
+          "mode": "id"
         },
         "returnAll": true
       },
-      "id": "a0802733-d0cf-4e36-9f83-1ab5e7f0bb68",
+      "id": "752a7a87-2795-401a-9c7a-022b16a3c29c",
       "name": "Get tracking state",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        64,
-        1360
+        -224,
+        656
       ]
     },
     {
@@ -606,39 +567,39 @@
           }
         }
       },
-      "id": "42e6d1b9-cba5-421c-b9ab-a894e69e2cdc",
+      "id": "e1bd12e4-24f9-4e33-abd0-020e1fb36b15",
       "name": "Merge tracking state",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3,
       "position": [
-        304,
-        1232
+        16,
+        528
       ]
     },
     {
       "parameters": {
-        "jsCode": "/**\n * Keeps only rows that are due for an Apify refresh.\n * New rows with no Data Table state pass through immediately.\n */\nconst now = Date.now();\n\nfunction toMs(value) {\n  if (value == null || value === '') return NaN;\n  const t = Date.parse(value);\n  return Number.isFinite(t) ? t : NaN;\n}\n\nreturn items.filter(item => {\n  const row = item.json;\n  const nextCheckMs = toMs(row.next_check_at);\n  if (!Number.isFinite(nextCheckMs)) return true;\n  return nextCheckMs <= now;\n});"
+        "jsCode": "const now = Date.now();\nconst MAX_POSTS_PER_RUN = 1000;\n\nfunction toMs(value) {\n  if (value == null || value === '') return NaN;\n  const t = Date.parse(value);\n  return Number.isFinite(t) ? t : NaN;\n}\n\nconst trackedDue = [];\nconst untrackedDue = [];\n\nfor (const item of items) {\n  const row = item.json || {};\n  const status = String(row.tracking_status || '').trim().toLowerCase();\n  if (status === 'stopped_stagnant') continue;\n\n  const nextCheckMs = toMs(row.next_check_at);\n  if (Number.isFinite(nextCheckMs) && nextCheckMs > now) continue;\n\n  const hasTrackingState = Boolean(\n    row.last_checked_at ||\n    row.window_started_at ||\n    row.last_views != null\n  );\n\n  (hasTrackingState ? trackedDue : untrackedDue).push(item);\n}\n\nreturn trackedDue.concat(untrackedDue).slice(0, MAX_POSTS_PER_RUN);"
       },
-      "id": "9d9f980a-8d70-4034-9689-adf480c27ac2",
+      "id": "6d3ea6da-e279-4892-b744-388366178133",
       "name": "Code: Filter due posts",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        528,
-        1232
+        240,
+        528
       ]
     },
     {
       "parameters": {
-        "jsCode": "/**\n * Compares fresh Apify metrics with the previous Data Table state and decides\n * when each reel should be checked again.\n */\nconst now = new Date();\nconst DAY_MS = 24 * 60 * 60 * 1000;\n\nconst CFG = {\n  ACTIVE_INTERVAL_DAYS: 1,\n  COOLDOWN_INTERVAL_DAYS: 2,\n  PAUSED_INTERVAL_DAYS: 7,\n  NO_GROWTH_CHECKS_TO_PAUSE: 3,\n};\n\nfunction num(value) {\n  const n = Number(value);\n  return Number.isFinite(n) ? n : 0;\n}\n\nfunction addDays(date, days) {\n  return new Date(date.getTime() + days * DAY_MS).toISOString();\n}\n\nfunction normalizeUrl(value) {\n  if (!value) return '';\n  const raw = String(value).trim();\n  if (!raw) return '';\n\n  try {\n    const u = new URL(raw);\n    u.hash = '';\n    u.search = '';\n    u.pathname = u.pathname.replace(/\\/+$/, '');\n    return u.toString().replace(/\\/+$/, '').toLowerCase();\n  } catch {\n    return raw.replace(/\\/+$/, '').toLowerCase();\n  }\n}\n\nfunction shortcodeFromUrl(value) {\n  const raw = String(value || '');\n  const m = raw.match(/instagram\\.com\\/(?:reel|p|tv)\\/([^/?#]+)/i);\n  return m ? m[1] : '';\n}\n\nfunction getShortcode(row) {\n  return row.shortCode || row.shortcode || row.code || shortcodeFromUrl(row.url || row.inputUrl);\n}\n\nfunction getViews(row) {\n  return Math.max(\n    num(row.videoPlayCount),\n    num(row.videoViewCount),\n    num(row.play_count),\n    num(row.ig_play_count),\n    num(row.views)\n  );\n}\n\nfunction getLikes(row) {\n  return num(row.likesCount ?? row.like_count);\n}\n\nfunction getComments(row) {\n  return num(row.commentsCount ?? row.comment_count);\n}\n\nlet previousItems = [];\ntry {\n  previousItems = $items('Code: Filter due posts').map(item => item.json);\n} catch (error) {\n  previousItems = [];\n}\n\nconst prevByUrl = new Map();\nconst prevByShortcode = new Map();\nfor (const prev of previousItems) {\n  const normalized = normalizeUrl(prev.url);\n  if (normalized) prevByUrl.set(normalized, prev);\n\n  const shortcode = prev.shortcode || prev.shortCode || shortcodeFromUrl(prev.url);\n  if (shortcode) prevByShortcode.set(String(shortcode), prev);\n}\n\nreturn items.map(item => {\n  const row = item.json;\n  const shortcode = getShortcode(row);\n\n  const candidateUrls = [\n    row.inputUrl,\n    row.url,\n    shortcode ? 'https://www.instagram.com/reel/' + shortcode : '',\n    shortcode ? 'https://www.instagram.com/p/' + shortcode : '',\n  ];\n\n  let prev = null;\n  for (const candidate of candidateUrls) {\n    const normalized = normalizeUrl(candidate);\n    if (normalized && prevByUrl.has(normalized)) {\n      prev = prevByUrl.get(normalized);\n      break;\n    }\n  }\n  if (!prev && shortcode) prev = prevByShortcode.get(String(shortcode));\n  if (!prev) prev = {};\n\n  const views = getViews(row);\n  const likes = getLikes(row);\n  const comments = getComments(row);\n\n  const hadPreviousState =\n    prev.last_checked_at ||\n    prev.last_views != null ||\n    prev.last_likes != null ||\n    prev.last_comments != null;\n\n  const prevViews = num(prev.last_views);\n  const prevLikes = num(prev.last_likes);\n  const prevComments = num(prev.last_comments);\n\n  const deltaViews = hadPreviousState ? views - prevViews : 0;\n  const deltaLikes = hadPreviousState ? likes - prevLikes : 0;\n  const deltaComments = hadPreviousState ? comments - prevComments : 0;\n\n  const grew = !hadPreviousState || deltaViews > 0 || deltaLikes > 0 || deltaComments > 0;\n  const noGrowthChecks = grew ? 0 : num(prev.no_growth_checks) + 1;\n\n  let trackingStatus = 'active';\n  let nextCheckAt = addDays(now, CFG.ACTIVE_INTERVAL_DAYS);\n\n  if (!grew && noGrowthChecks >= CFG.NO_GROWTH_CHECKS_TO_PAUSE) {\n    trackingStatus = 'paused_no_growth';\n    nextCheckAt = addDays(now, CFG.PAUSED_INTERVAL_DAYS);\n  } else if (!grew) {\n    trackingStatus = 'cooldown';\n    nextCheckAt = addDays(now, CFG.COOLDOWN_INTERVAL_DAYS);\n  }\n\n  const trackingUrl = prev.url || row.inputUrl || row.url || (shortcode ? 'https://www.instagram.com/reel/' + shortcode + '/' : '');\n\n  return {\n    json: {\n      ...row,\n      tracking_url: trackingUrl,\n      tracking_shortcode: shortcode,\n      tracking_status: trackingStatus,\n      last_checked_at: now.toISOString(),\n      last_growth_at: grew ? now.toISOString() : (prev.last_growth_at || null),\n      last_views: views,\n      last_likes: likes,\n      last_comments: comments,\n      delta_views: deltaViews,\n      delta_likes: deltaLikes,\n      delta_comments: deltaComments,\n      no_growth_checks: noGrowthChecks,\n      next_check_at: nextCheckAt,\n    },\n  };\n});"
+        "jsCode": "const now = new Date();\nconst DAY_MS = 24 * 60 * 60 * 1000;\n\nconst CFG = {\n  ACTIVE_INTERVAL_DAYS: 1,\n  WINDOW_HOURS: 72,\n  MIN_WINDOW_GROWTH_PCT: 0.10,\n};\n\nfunction num(value) {\n  const n = Number(value);\n  return Number.isFinite(n) ? n : 0;\n}\n\nfunction toMs(value) {\n  if (value == null || value === '') return NaN;\n  const t = Date.parse(value);\n  return Number.isFinite(t) ? t : NaN;\n}\n\nfunction addDays(date, days) {\n  return new Date(date.getTime() + days * DAY_MS).toISOString();\n}\n\nfunction normalizeUrl(value) {\n  if (!value) return '';\n  const raw = String(value).trim();\n  if (!raw) return '';\n  try {\n    const u = new URL(raw);\n    u.hash = '';\n    u.search = '';\n    u.pathname = u.pathname.replace(/\\/+$/, '');\n    return u.toString().replace(/\\/+$/, '').toLowerCase();\n  } catch {\n    return raw.replace(/\\/+$/, '').toLowerCase();\n  }\n}\n\nfunction shortcodeFromUrl(value) {\n  const match = String(value || '').match(\n    /instagram\\.com\\/(?:reel|p|tv)\\/([^/?#]+)/i\n  );\n  return match ? match[1] : '';\n}\n\nfunction getShortcode(row) {\n  return row.shortCode || row.shortcode || row.code ||\n    shortcodeFromUrl(row.url || row.inputUrl);\n}\n\nfunction getViews(row) {\n  return Math.max(\n    num(row.videoPlayCount),\n    num(row.videoViewCount),\n    num(row.play_count),\n    num(row.ig_play_count),\n    num(row.views)\n  );\n}\n\nfunction getLikes(row) {\n  return num(row.likesCount ?? row.like_count);\n}\n\nfunction getComments(row) {\n  return num(row.commentsCount ?? row.comment_count);\n}\n\nlet previousItems = [];\ntry {\n  previousItems = $items('Code: Filter due posts').map(item => item.json);\n} catch {\n  previousItems = [];\n}\n\nconst prevByUrl = new Map();\nconst prevByShortcode = new Map();\n\nfor (const prev of previousItems) {\n  const normalized = normalizeUrl(prev.url);\n  if (normalized) prevByUrl.set(normalized, prev);\n  const shortcode =\n    prev.shortcode || prev.shortCode || shortcodeFromUrl(prev.url);\n  if (shortcode) prevByShortcode.set(String(shortcode), prev);\n}\n\nreturn items.map(item => {\n  const row = item.json || {};\n  const shortcode = getShortcode(row);\n  const candidateUrls = [\n    row.inputUrl,\n    row.url,\n    shortcode ? 'https://www.instagram.com/reel/' + shortcode : '',\n    shortcode ? 'https://www.instagram.com/p/' + shortcode : '',\n  ];\n\n  let prev = null;\n  for (const candidate of candidateUrls) {\n    const normalized = normalizeUrl(candidate);\n    if (normalized && prevByUrl.has(normalized)) {\n      prev = prevByUrl.get(normalized);\n      break;\n    }\n  }\n\n  if (!prev && shortcode) prev = prevByShortcode.get(String(shortcode));\n  if (!prev) prev = {};\n\n  const views = getViews(row);\n  const likes = getLikes(row);\n  const comments = getComments(row);\n\n  const hadPreviousState = Boolean(\n    prev.last_checked_at ||\n    prev.window_started_at ||\n    prev.last_views != null\n  );\n\n  const prevViews = num(prev.last_views);\n  const prevLikes = num(prev.last_likes);\n  const prevComments = num(prev.last_comments);\n\n  const deltaViews = hadPreviousState ? views - prevViews : 0;\n  const deltaLikes = hadPreviousState ? likes - prevLikes : 0;\n  const deltaComments = hadPreviousState ? comments - prevComments : 0;\n\n  let windowStartedAt = prev.window_started_at || null;\n  let windowStartViews = num(prev.window_start_views);\n  let growth3dPct = 0;\n  let trackingStatus = 'active';\n  let nextCheckAt = addDays(now, CFG.ACTIVE_INTERVAL_DAYS);\n  let stoppedAt = null;\n  let stopReason = '';\n\n  const windowStartedMs = toMs(windowStartedAt);\n  const hasWindow =\n    Number.isFinite(windowStartedMs) &&\n    prev.window_start_views != null;\n\n  if (!hasWindow) {\n    windowStartedAt = now.toISOString();\n    windowStartViews = views;\n  } else {\n    growth3dPct = windowStartViews > 0\n      ? Math.max(0, views - windowStartViews) / windowStartViews\n      : (views > 0 ? 1 : 0);\n\n    const windowAgeHours =\n      (now.getTime() - windowStartedMs) / (60 * 60 * 1000);\n\n    if (windowAgeHours >= CFG.WINDOW_HOURS) {\n      if (growth3dPct >= CFG.MIN_WINDOW_GROWTH_PCT) {\n        windowStartedAt = now.toISOString();\n        windowStartViews = views;\n        growth3dPct = 0;\n      } else {\n        trackingStatus = 'stopped_stagnant';\n        nextCheckAt = null;\n        stoppedAt = now.toISOString();\n        stopReason = 'views_growth_below_10pct_over_72h';\n      }\n    }\n  }\n\n  const trackingUrl =\n    prev.url ||\n    row.inputUrl ||\n    row.url ||\n    (shortcode\n      ? 'https://www.instagram.com/reel/' + shortcode + '/'\n      : '');\n\n  const lastGrowthAt = deltaViews > 0\n    ? now.toISOString()\n    : (prev.last_growth_at || null);\n\n  const noGrowthChecks = deltaViews > 0\n    ? 0\n    : num(prev.no_growth_checks) + (hadPreviousState ? 1 : 0);\n\n  return {\n    json: {\n      ...row,\n      tracking_url: trackingUrl,\n      tracking_shortcode: shortcode,\n      tracking_status: trackingStatus,\n      last_checked_at: now.toISOString(),\n      last_growth_at: lastGrowthAt,\n      last_views: views,\n      last_likes: likes,\n      last_comments: comments,\n      delta_views: deltaViews,\n      delta_likes: deltaLikes,\n      delta_comments: deltaComments,\n      no_growth_checks: noGrowthChecks,\n      next_check_at: nextCheckAt,\n      window_started_at: windowStartedAt,\n      window_start_views: windowStartViews,\n      growth_3d_pct: growth3dPct,\n      stopped_at: stoppedAt,\n      stop_reason: stopReason,\n    },\n  };\n});"
       },
-      "id": "33c7250f-b054-47e5-ba21-91203727322b",
+      "id": "11aab4bf-88a7-430e-9883-a815319b91f3",
       "name": "Code: Calculate tracking state",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1424,
-        1248
+        1136,
+        544
       ]
     },
     {
@@ -646,10 +607,8 @@
         "operation": "upsert",
         "dataTableId": {
           "__rl": true,
-          "value": "IfyC05aM0eYqTAE7",
-          "mode": "list",
-          "cachedResultName": "IG Metrics Tracking State",
-          "cachedResultUrl": "/projects/Z4xKAmlikaZIHgF6/datatables/IfyC05aM0eYqTAE7"
+          "value": "YOUR_N8N_DATA_TABLE_ID",
+          "mode": "id"
         },
         "filters": {
           "conditions": [
@@ -662,8 +621,8 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "url": "={{ $json.inputUrl }}",
-            "shortcode": "={{ $json.shortCode }}",
+            "url": "={{ $json.tracking_url }}",
+            "shortcode": "={{ $json.tracking_shortcode }}",
             "tracking_status": "={{ $json.tracking_status }}",
             "last_checked_at": "={{ $json.last_checked_at }}",
             "last_growth_at": "={{ $json.last_growth_at }}",
@@ -674,7 +633,12 @@
             "delta_likes": "={{ $json.delta_likes }}",
             "delta_comments": "={{ $json.delta_comments }}",
             "no_growth_checks": "={{ $json.no_growth_checks }}",
-            "next_check_at": "={{ $json.next_check_at }}"
+            "next_check_at": "={{ $json.next_check_at }}",
+            "window_started_at": "={{ $json.window_started_at }}",
+            "window_start_views": "={{ $json.window_start_views }}",
+            "growth_3d_pct": "={{ $json.growth_3d_pct }}",
+            "stopped_at": "={{ $json.stopped_at }}",
+            "stop_reason": "={{ $json.stop_reason }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -734,7 +698,7 @@
               "required": false,
               "defaultMatch": false,
               "display": true,
-              "type": "string",
+              "type": "number",
               "readOnly": false,
               "removed": false
             },
@@ -744,7 +708,7 @@
               "required": false,
               "defaultMatch": false,
               "display": true,
-              "type": "string",
+              "type": "number",
               "readOnly": false,
               "removed": false
             },
@@ -794,7 +758,7 @@
               "required": false,
               "defaultMatch": false,
               "display": true,
-              "type": "string",
+              "type": "number",
               "readOnly": false,
               "removed": false
             },
@@ -807,6 +771,56 @@
               "type": "dateTime",
               "readOnly": false,
               "removed": false
+            },
+            {
+              "id": "window_started_at",
+              "displayName": "window_started_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "window_start_views",
+              "displayName": "window_start_views",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "growth_3d_pct",
+              "displayName": "growth_3d_pct",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "stopped_at",
+              "displayName": "stopped_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "stop_reason",
+              "displayName": "stop_reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
             }
           ],
           "attemptToConvertTypes": false,
@@ -814,30 +828,50 @@
         },
         "options": {}
       },
-      "id": "d20f1c1d-c943-458b-9f63-1ab86bd2773d",
+      "id": "5bd409ec-10d6-4617-a22a-b2e808233e11",
       "name": "Upsert tracking state",
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1,
       "position": [
-        1648,
-        1088
+        1360,
+        384
       ]
     },
     {
       "parameters": {
-        "content": "## Tracking state setup\n\nWorkflow now uses the native n8n Data Table before Apify.\n\nCreate/check these columns in the selected Data Table:\n- `url` string\n- `shortcode` string\n- `tracking_status` string\n- `last_checked_at` dateTime\n- `last_growth_at` dateTime\n- `last_views`, `last_likes`, `last_comments` number\n- `delta_views`, `delta_likes`, `delta_comments` number\n- `no_growth_checks` number\n- `next_check_at` dateTime\n\nLogic: new/due posts go to Apify; no-growth posts move to `cooldown` after 1 check and `paused_no_growth` after 3 no-growth checks. Paused posts are rechecked after 7 days.",
-        "height": 420,
-        "width": 420,
+        "content": "## View-growth tracking\n\nOnly views determine whether a post remains in the paid Apify refresh loop.\n\n- First observation establishes a view baseline.\n- Active posts are refreshed daily.\n- At 72 hours, view growth is compared with the baseline.\n- Growth >= 10%: keep active and start a new 72-hour window.\n- Growth < 10%: set `stopped_stagnant` and exclude before Apify.\n- Likes/comments are stored for reporting only.\n- The sheet is read without a fixed row limit.\n- Paid refreshes are capped at 1,000 due posts per run; tracked posts have priority.\n\nStopped posts can be reactivated explicitly by changing their tracking state and clearing the window fields.",
+        "height": 520,
+        "width": 440,
         "color": 4
       },
-      "id": "39479e7f-fab4-47f7-9618-2eefe8964be9",
+      "id": "c09053aa-f50f-4904-99e4-820bbaba4df3",
       "name": "READ ME: Tracking state",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        288,
-        704
+        0,
+        0
       ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 1,
+              "triggerAtMinute": 20
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -464,
+        544
+      ],
+      "id": "fb892422-10ea-46e0-9255-986c5894d78c",
+      "name": "Schedule Trigger"
     }
   ],
   "pinData": {},
@@ -881,22 +915,6 @@
         [
           {
             "node": "Merge tracking state",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "When clicking ‘Execute workflow’": {
-      "main": [
-        [
-          {
-            "node": "Get row(s) in sheet",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Get tracking state",
             "type": "main",
             "index": 0
           }
@@ -962,20 +980,31 @@
           }
         ]
       ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get tracking state",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false
+    "availableInMCP": true,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
   },
-  "versionId": "641300d7-de98-4961-91f6-a58a0cde0816",
-  "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "b4133111f3c5848c25758b32cbf6eac5c8844e43bb04ededb8c87ee88bcf165a"
-  },
-  "nodeGroups": [],
-  "id": "Nh69PGfPMqXmvv3N",
-  "tags": []
+  "nodeGroups": []
 }
