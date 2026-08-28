@@ -713,12 +713,5 @@
     "timeSavedMode": "fixed",
     "callerPolicy": "workflowsFromSameOwner"
   },
-  "versionId": "de98411f-d54e-462d-acc2-43c6eb768338",
-  "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "b4133111f3c5848c25758b32cbf6eac5c8844e43bb04ededb8c87ee88bcf165a"
-  },
-  "nodeGroups": [],
-  "id": "XXwaF6m8ivySSOKN",
-  "tags": []
+  "nodeGroups": []
 }
